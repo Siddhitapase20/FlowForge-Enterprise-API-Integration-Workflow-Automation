@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FlowForge – Enterprise Workflow Automation</title>
+
+<!-- React + Babel CDN -->
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+
+<!-- ═══════════════ GLOBAL STYLES (CSS) ═══════════════ -->
+<style>
+/* ── Reset & Base ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body,#root{height:100%;overflow:hidden}
+body{
+  background:#0b0d13;
+  color:#dde1f0;
+  font-family:'Sora',sans-serif;
+  font-size:14px;
+  line-height:1.55;
+}
+
+/* ── CSS Variables ── */
+:root{
+  --bg0:#0b0d13;
+  --bg1:#10131b;
+  --bg2:#161924;
+  --bg3:#1d2130;
+  --bg4:#252a3a;
+  --bg5:#2e3448;
+  --border:#ffffff0f;
+  --border2:#ffffff18;
+  --border3:#ffffff26;
+  --text:#dde1f0;
+  --text2:#8890a8;
+  --text3:#555e78;
+  --blue:#4f8ef7;
+  --blue2:#6ba3ff;
+  --green:#3ecf8e;
+  --red:#f16060;
+  --amber:#f5a623;
+  --purple:#9b71f5;
+  --cyan:#38c9e8;
+  --pink:#f06db5;
+  --r:7px;
+  --r2:11px;
+  --r3:16px;
+  --font:'Sora',sans-serif;
+  --mono:'JetBrains Mono',monospace;
+  --shadow:0 4px 20px rgba(0,0,0,.5);
+  --shadow2:0 8px 40px rgba(0,0,0,.6);
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bg5);border-radius:2px}
+
+/* ── Typography ── */
+h1{font-size:22px;font-weight:600;color:var(--text)}
+h2{font-size:18px;font-weight:600;color:var(--text)}
+h3{font-size:14px;font-weight:500;color:var(--text)}
+p{color:var(--text2);font-size:13px}
+
+/* ── Forms ── */
+input,select,textarea{
+  font-family:var(--font);
+  font-size:13px;
+  background:var(--bg3);
+  border:1px solid var(--border2);
+  color:var(--text);
+  border-radius:var(--r);
+  padding:9px 12px;
+  outline:none;
+  width:100%;
+  transition:border .2s,background .2s;
+}
+input:focus,select:focus,textarea:focus{
+  border-color:var(--blue);
+  background:var(--bg4);
+}
+select option{background:var(--bg3);color:var(--text)}
+input[type="checkbox"]{width:auto;cursor:pointer;accent-color:var(--blue)}
+label{font-size:12px;color:var(--text2);font-weight:500;display:block;margin-bottom:5px}
+
+/* ── Buttons ── */
+button{font-family:var(--font);cursor:pointer;border:none;outline:none;transition:all .15s;font-size:13px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--r);font-weight:500}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-primary:hover{background:#3a7ff5;transform:translateY(-1px)}
+.btn-secondary{background:var(--bg4);color:var(--text);border:1px solid var(--border2)}
+.btn-secondary:hover{background:var(--bg5);border-color:var(--border3)}
+.btn-ghost{background:transparent;color:var(--text2);padding:6px 10px;border-radius:var(--r)}
+.btn-ghost:hover{background:var(--bg3);color:var(--text)}
+.btn-danger{background:rgba(241,96,96,.12);color:var(--red);border:1px solid rgba(241,96,96,.25)}
+.btn-danger:hover{background:rgba(241,96,96,.22)}
+.btn-success{background:rgba(62,207,142,.12);color:var(--green);border:1px solid rgba(62,207,142,.25)}
+.btn-success:hover{background:rgba(62,207,142,.22)}
+.btn-sm{padding:5px 10px;font-size:12px}
+
+/* ── Cards ── */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2)}
+.card-hover:hover{border-color:var(--border2);transform:translateY(-1px);transition:all .2s}
+
+/* ── Badges ── */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:500}
+.badge-green{background:rgba(62,207,142,.13);color:var(--green)}
+.badge-red{background:rgba(241,96,96,.13);color:var(--red)}
+.badge-amber{background:rgba(245,166,35,.13);color:var(--amber)}
+.badge-blue{background:rgba(79,142,247,.13);color:var(--blue2)}
+.badge-gray{background:var(--bg4);color:var(--text2)}
+.badge-purple{background:rgba(155,113,245,.13);color:var(--purple)}
+.badge-cyan{background:rgba(56,201,232,.13);color:var(--cyan)}
+
+/* ── Status dots ── */
+.dot{width:6px;height:6px;border-radius:50%;display:inline-block;flex-shrink:0}
+.dot-green{background:var(--green)}
+.dot-red{background:var(--red)}
+.dot-amber{background:var(--amber)}
+.dot-blue{background:var(--blue)}
+.dot-gray{background:var(--text3)}
+
+/* ── Tags ── */
+.tag{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:500;font-family:var(--mono)}
+
+/* ── Divider ── */
+.divider{height:1px;background:var(--border);margin:12px 0}
+
+/* ── Utility ── */
+.flex{display:flex;align-items:center}
+.flex-between{display:flex;align-items:center;justify-content:space-between}
+.gap-4{gap:4px}.gap-6{gap:6px}.gap-8{gap:8px}.gap-10{gap:10px}.gap-12{gap:12px}.gap-16{gap:16px}
+.mono{font-family:var(--mono)}
+.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.full{width:100%}
+
+/* ── Animations ── */
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{transform:translateY(10px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes slideRight{from{transform:translateX(-10px);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(79,142,247,.3)}50%{box-shadow:0 0 0 6px rgba(79,142,247,.0)}}
+.anim-fade{animation:fadeIn .25s ease}
+.anim-up{animation:slideUp .25s ease}
+.anim-right{animation:slideRight .2s ease}
+.spin{animation:spin .7s linear infinite}
+.pulse-dot{animation:pulse 1.8s ease infinite}
+
+/* ── Spinner ── */
+.spinner{width:16px;height:16px;border:2px solid var(--border2);border-top-color:var(--blue);border-radius:50%;display:inline-block;animation:spin .65s linear infinite}
+
+/* ── Layout ── */
+.app-layout{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:220px;background:var(--bg1);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100%;flex-shrink:0}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{height:54px;background:var(--bg1);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:12px;flex-shrink:0}
+.page{flex:1;overflow-y:auto;padding:22px 24px}
+
+/* ── Sidebar items ── */
+.nav-item{display:flex;align-items:center;gap:9px;width:100%;padding:9px 11px;border-radius:var(--r);background:transparent;color:var(--text2);cursor:pointer;transition:all .15s;font-size:13px;font-weight:400;border:none;font-family:var(--font);text-align:left}
+.nav-item:hover{background:var(--bg3);color:var(--text)}
+.nav-item.active{background:var(--bg4);color:var(--text);font-weight:500}
+.nav-item.active .nav-icon{color:var(--blue)}
+
+/* ── Tables ── */
+table{width:100%;border-collapse:collapse}
+thead tr{background:var(--bg3);border-bottom:1px solid var(--border2)}
+th{padding:10px 14px;text-align:left;font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.05em}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+tbody tr:hover{background:var(--bg3)}
+td{padding:10px 14px;font-size:12px;vertical-align:middle}
+tbody tr:last-child{border-bottom:none}
+
+/* ── Progress bar ── */
+.progress-track{height:5px;background:var(--bg4);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;border-radius:3px;transition:width .6s ease}
+
+/* ── Stat card ── */
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:16px 18px}
+.stat-value{font-size:28px;font-weight:600;font-family:var(--mono);line-height:1.1;margin-top:6px}
+.stat-label{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em}
+
+/* ── Flow node ── */
+.flow-node{border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px;width:100%}
+.flow-connector{width:2px;height:28px;margin:0 auto;transition:background .3s}
+.flow-arrow{width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;margin:0 auto}
+
+/* ── Toast ── */
+.toast-container{position:fixed;bottom:18px;right:18px;z-index:9999;display:flex;flex-direction:column;gap:8px}
+.toast{background:var(--bg3);border-radius:var(--r2);padding:11px 16px;font-size:13px;color:var(--text);max-width:320px;box-shadow:var(--shadow2);animation:slideUp .2s ease;border-left:3px solid}
+
+/* ── Avatar ── */
+.avatar{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0}
+
+/* ── Modal overlay ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:8000;display:flex;align-items:center;justify-content:center;animation:fadeIn .15s}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r3);padding:24px;width:480px;max-width:95vw;max-height:85vh;overflow-y:auto;animation:slideUp .2s ease;box-shadow:var(--shadow2)}
+
+/* ── Section header ── */
+.section-header{margin-bottom:18px}
+.section-header h2{margin-bottom:3px}
+.section-header p{font-size:12px;color:var(--text3)}
+
+/* ── Empty state ── */
+.empty{text-align:center;padding:48px 24px;color:var(--text3);font-size:13px}
+.empty-icon{font-size:36px;margin-bottom:12px;opacity:.6}
+
+/* ── Notification panel ── */
+.notif-panel{position:absolute;top:58px;right:12px;width:310px;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r3);box-shadow:var(--shadow2);z-index:2000;overflow:hidden;animation:slideUp .15s ease}
+
+/* ── Search input ── */
+.search-wrap{position:relative}
+.search-wrap input{padding-left:34px}
+.search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text3);pointer-events:none}
+
+/* ── Switch ── */
+.switch{position:relative;display:inline-block;width:36px;height:20px;flex-shrink:0}
+.switch input{opacity:0;width:0;height:0}
+.switch-slider{position:absolute;cursor:pointer;inset:0;background:var(--bg5);border-radius:999px;transition:.25s}
+.switch-slider::before{content:'';position:absolute;height:14px;width:14px;left:3px;bottom:3px;background:var(--text3);border-radius:50%;transition:.25s}
+.switch input:checked+.switch-slider{background:var(--blue)}
+.switch input:checked+.switch-slider::before{transform:translateX(16px);background:#fff}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<!-- ═══════════════ REACT APPLICATION (JSX) ═══════════════ -->
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback, useMemo } = React;
+
+// ─── API BASE URL (change this to your backend URL) ───────────────────────────
+const API = 'http://localhost:3001/api';
+
+// ─── STATIC DATA (used as fallback / for demo) ───────────────────────────────
+const TRIGGERS = [
+  { id:'new_order',        label:'New Order Placed',       icon:'📦', cat:'E-Commerce' },
+  { id:'payment_received', label:'Payment Received',       icon:'💳', cat:'Payments'   },
+  { id:'new_lead',         label:'New CRM Lead',           icon:'👤', cat:'CRM'        },
+  { id:'support_ticket',   label:'Support Ticket Created', icon:'🎫', cat:'Support'    },
+  { id:'user_signup',      label:'New User Signup',        icon:'✨', cat:'Auth'       },
+  { id:'inventory_low',    label:'Inventory Low Alert',    icon:'⚠️', cat:'E-Commerce' },
+  { id:'refund_request',   label:'Refund Requested',       icon:'↩️', cat:'Payments'   },
+  { id:'scheduled',        label:'Scheduled (Daily 9AM)',  icon:'🕘', cat:'Schedule'   },
+];
+const ACTIONS = [
+  { id:'send_email',       label:'Send Email',             icon:'✉️', cat:'Email'     },
+  { id:'send_slack',       label:'Send Slack Message',     icon:'💬', cat:'Messaging' },
+  { id:'update_crm',       label:'Update CRM Record',      icon:'📊', cat:'CRM'       },
+  { id:'create_task',      label:'Create Task in Asana',   icon:'✅', cat:'Tasks'     },
+  { id:'add_to_sheet',     label:'Add Row to Spreadsheet', icon:'📋', cat:'Data'      },
+  { id:'webhook',          label:'Call Webhook / API',     icon:'🔗', cat:'Dev'       },
+  { id:'send_sms',         label:'Send SMS Alert',         icon:'📱', cat:'Messaging' },
+  { id:'notify_team',      label:'Notify Team',            icon:'🔔', cat:'Notif'     },
+  { id:'update_inventory', label:'Update Inventory',       icon:'📦', cat:'E-Commerce'},
+  { id:'generate_invoice', label:'Generate Invoice',       icon:'🧾', cat:'Finance'   },
+];
+const SIMULATE_EVENTS = [
+  { id:'new_order',        label:'New Order',      icon:'📦' },
+  { id:'payment_received', label:'Payment',        icon:'💳' },
+  { id:'new_lead',         label:'New Lead',       icon:'👤' },
+  { id:'support_ticket',   label:'Support Ticket', icon:'🎫' },
+  { id:'user_signup',      label:'User Signup',    icon:'✨' },
+  { id:'inventory_low',    label:'Low Stock',      icon:'⚠️' },
+  { id:'refund_request',   label:'Refund',         icon:'↩️' },
+];
+
+// ─── HELPERS ──────────────────────────────────────────────────────────────────
+const timeAgo = ts => {
+  const d = Date.now() - ts;
+  if (d < 60000)   return 'just now';
+  if (d < 3600000) return `${Math.floor(d/60000)}m ago`;
+  if (d < 86400000)return `${Math.floor(d/3600000)}h ago`;
+  return `${Math.floor(d/86400000)}d ago`;
+};
+const groupBy = (arr, key) => arr.reduce((acc, x) => { (acc[x[key]] = acc[x[key]]||[]).push(x); return acc; }, {});
+const getTrigger = id => TRIGGERS.find(t=>t.id===id);
+const getAction  = id => ACTIONS.find(a=>a.id===id);
+
+// ─── API SERVICE ──────────────────────────────────────────────────────────────
+const apiCall = async (path, opts = {}) => {
+  const token = sessionStorage.getItem('ff_token');
+  const res = await fetch(`${API}${path}`, {
+    headers: { 'Content-Type':'application/json', ...(token ? { Authorization:`Bearer ${token}` } : {}) },
+    ...opts,
+    body: opts.body ? JSON.stringify(opts.body) : undefined,
+  });
+  if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error(e.error||'API Error'); }
+  return res.json();
+};
+
+// ─── TOAST HOOK ───────────────────────────────────────────────────────────────
+function useToast() {
+  const [toasts, setToasts] = useState([]);
+  const toast = useCallback((msg, type='info') => {
+    const id = Math.random().toString(36).slice(2);
+    setToasts(t => [...t, { id, msg, type }]);
+    setTimeout(() => setToasts(t => t.filter(x => x.id !== id)), 3500);
+  }, []);
+  return { toasts, toast };
+}
+
+function Toasts({ toasts }) {
+  const colors = { success:'var(--green)', error:'var(--red)', info:'var(--blue)', warning:'var(--amber)' };
+  return (
+    <div className="toast-container">
+      {toasts.map(t => (
+        <div key={t.id} className="toast" style={{ borderLeftColor: colors[t.type]||colors.info }}>{t.msg}</div>
+      ))}
+    </div>
+  );
+}
+
+// ─── AVATAR ───────────────────────────────────────────────────────────────────
+function Avatar({ initials, size=32, seed='' }) {
+  const COLORS = ['#4f6ef5','#9b71f5','#3ecf8e','#f06db5','#38c9e8','#f5a623','#f16060'];
+  const bg = COLORS[(seed||initials||'A').charCodeAt(0) % COLORS.length];
+  return (
+    <div className="avatar" style={{ width:size, height:size, background:bg, fontSize:size*.36, color:'#fff' }}>
+      {(initials||'?').slice(0,2).toUpperCase()}
+    </div>
+  );
+}
+
+// ─── SVG ICONS ────────────────────────────────────────────────────────────────
+const ICON_PATHS = {
+  grid:    'M3 3h7v7H3zm11 0h7v7h-7zm0 11h7v7h-7zM3 14h7v7H3z',
+  zap:     'M13 2L3 14h9l-1 8 10-12h-9l1-8z',
+  plug:    'M7 2v5M17 2v5M3 9h18v2a7 7 0 01-14 0H3V9zm7 10v3h4v-3',
+  logs:    'M4 6h16M4 12h16M4 18h10',
+  bell:    'M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0',
+  plus:    'M12 5v14M5 12h14',
+  x:       'M18 6L6 18M6 6l12 12',
+  check:   'M20 6L9 17l-5-5',
+  play:    'M5 3l14 9-14 9V3z',
+  pause:   'M10 4H6v16h4V4zm8 0h-4v16h4V4z',
+  trash:   'M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6',
+  edit:    'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z',
+  logout:  'M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9',
+  chart:   'M18 20V10M12 20V4M6 20v-6',
+  user:    'M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 3a4 4 0 100 8 4 4 0 000-8z',
+  settings:'M12 15a3 3 0 100-6 3 3 0 000 6zm6.71-2.04a7 7 0 000-1.92l2.07-1.62a.5.5 0 00.12-.64l-1.96-3.39a.5.5 0 00-.61-.22l-2.44.98a7.29 7.29 0 00-1.66-.96l-.37-2.6A.49.49 0 0013 3h-2a.49.49 0 00-.49.42l-.37 2.59a7.29 7.29 0 00-1.66.97l-2.44-.98a.5.5 0 00-.61.22L3.47 9.61a.49.49 0 00.12.64l2.07 1.62a7.37 7.37 0 000 1.92L3.59 15.4a.49.49 0 00-.12.64l1.96 3.39a.5.5 0 00.61.22l2.44-.98a7.29 7.29 0 001.66.97l.37 2.59c.05.24.27.42.49.42h2c.24 0 .44-.18.49-.42l.37-2.6a7.29 7.29 0 001.66-.96l2.44.98a.5.5 0 00.61-.22l1.96-3.39a.49.49 0 00-.12-.64l-2.07-1.61z',
+  arrow:   'M5 12h14M12 5l7 7-7 7',
+  warn:    'M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0zM12 9v4M12 17h.01',
+  search:  'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z',
+  refresh: 'M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15',
+  building:'M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2zM9 22V12h6v10',
+  users:   'M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 7a4 4 0 100 8 4 4 0 000-8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75',
+  link:    'M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71',
+};
+function Icon({ name, size=15, color='currentColor', className='' }) {
+  const d = ICON_PATHS[name] || '';
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none"
+      stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      {d.split(/(?=[A-Z])/).filter(Boolean).reduce((acc, seg) => {
+        if (seg.startsWith('M')) acc.push(seg); else if (acc.length) acc[acc.length-1] += seg;
+        return acc;
+      }, []).map((seg,i) => <path key={i} d={seg.trim()}/>)}
+    </svg>
+  );
+}
+
+// ─── AUTH SCREEN ──────────────────────────────────────────────────────────────
+function AuthScreen({ onLogin }) {
+  const [tab, setTab]       = useState('login');
+  const [email, setEmail]   = useState('alex@acme.com');
+  const [pass, setPass]     = useState('admin123');
+  const [name, setName]     = useState('');
+  const [loading, setLoad]  = useState(false);
+  const [error, setError]   = useState('');
+
+  const demoUsers = [
+    { email:'alex@acme.com',   name:'Alex Morgan', role:'Admin',   avatar:'AM', id:'u1' },
+    { email:'sam@acme.com',    name:'Sam Rivera',  role:'Manager', avatar:'SR', id:'u2' },
+    { email:'jamie@acme.com',  name:'Jamie Lee',   role:'User',    avatar:'JL', id:'u3' },
+    { email:'taylor@neon.io',  name:'Taylor Kim',  role:'Admin',   avatar:'TK', id:'u4' },
+  ];
+
+  const submit = async (e) => {
+    e.preventDefault(); setError(''); setLoad(true);
+    try {
+      const path = tab === 'login' ? '/auth/login' : '/auth/signup';
+      const body = tab === 'login' ? { email, password: pass } : { name, email, password: pass };
+      const data = await apiCall(path, { method:'POST', body });
+      sessionStorage.setItem('ff_token', data.token);
+      onLogin(data.user);
+    } catch (err) {
+      setError(err.message);
+    } finally { setLoad(false); }
+  };
+
+  return (
+    <div style={{ minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', background:'var(--bg0)' }} className="anim-fade">
+      <div style={{ width:400 }}>
+        {/* Logo */}
+        <div style={{ textAlign:'center', marginBottom:28 }}>
+          <div style={{ width:52, height:52, background:'linear-gradient(135deg,var(--blue),var(--purple))', borderRadius:14, display:'flex', alignItems:'center', justifyContent:'center', fontSize:26, margin:'0 auto 14px', boxShadow:'0 0 30px rgba(79,142,247,.3)' }}>⚡</div>
+          <h1 style={{ fontFamily:'Sora', fontWeight:600, fontSize:24 }}>FlowForge</h1>
+          <p style={{ fontSize:12, color:'var(--text3)', marginTop:4 }}>Enterprise API Integration & Workflow Automation</p>
+        </div>
+
+        <div className="card" style={{ padding:28 }}>
+          {/* Tabs */}
+          <div style={{ display:'flex', background:'var(--bg3)', borderRadius:'var(--r)', padding:3, marginBottom:22 }}>
+            {['login','signup'].map(t => (
+              <button key={t} onClick={()=>setTab(t)} style={{ flex:1, padding:'7px 0', border:'none', borderRadius:'var(--r)', background: tab===t ? 'var(--bg5)' : 'transparent', color: tab===t ? 'var(--text)' : 'var(--text2)', fontFamily:'var(--font)', fontSize:13, fontWeight: tab===t ? 500 : 400, cursor:'pointer', transition:'all .2s', textTransform:'capitalize' }}>
+                {t}
+              </button>
+            ))}
+          </div>
+
+          <form onSubmit={submit}>
+            {tab==='signup' && (
+              <div style={{ marginBottom:14 }}>
+                <label>Full Name</label>
+                <input value={name} onChange={e=>setName(e.target.value)} placeholder="Your full name" required/>
+              </div>
+            )}
+            <div style={{ marginBottom:14 }}>
+              <label>Email Address</label>
+              <input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@company.com" required/>
+            </div>
+            <div style={{ marginBottom:20 }}>
+              <label>Password</label>
+              <input type="password" value={pass} onChange={e=>setPass(e.target.value)} placeholder="••••••••" minLength={6} required/>
+            </div>
+            {error && (
+              <div style={{ background:'rgba(241,96,96,.1)', border:'1px solid rgba(241,96,96,.25)', color:'var(--red)', padding:'8px 12px', borderRadius:'var(--r)', fontSize:12, marginBottom:16 }}>
+                {error}
+              </div>
+            )}
+            <button type="submit" className="btn btn-primary full" style={{ justifyContent:'center', height:40, fontSize:14 }} disabled={loading}>
+              {loading ? <span className="spinner"/> : (tab==='login' ? 'Sign In →' : 'Create Account →')}
+            </button>
+          </form>
+
+          {tab==='login' && (
+            <div style={{ marginTop:20 }}>
+              <div className="divider"/>
+              <p style={{ fontSize:11, color:'var(--text3)', marginBottom:10, textAlign:'center', letterSpacing:'.04em', textTransform:'uppercase' }}>Quick Demo</p>
+              <div style={{ display:'flex', flexDirection:'column', gap:5 }}>
+                {demoUsers.map(u => (
+                  <button key={u.id} onClick={()=>{ setEmail(u.email); setPass('admin123'); }} className="btn btn-ghost" style={{ justifyContent:'space-between', width:'100%', padding:'7px 10px' }}>
+                    <span style={{ display:'flex', alignItems:'center', gap:8 }}>
+                      <Avatar initials={u.avatar} size={26} seed={u.id}/>
+                      <span style={{ fontSize:12 }}>{u.name}</span>
+                    </span>
+                    <span className={`badge badge-${u.role==='Admin'?'purple':u.role==='Manager'?'blue':'gray'}`}>{u.role}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── SIDEBAR ──────────────────────────────────────────────────────────────────
+function Sidebar({ page, setPage, user, onLogout }) {
+  const COMPANY_NAMES = { c1:'Acme Corp', c2:'Neon Labs' };
+  const nav = [
+    { id:'dashboard',    icon:'grid',     label:'Dashboard'     },
+    { id:'workflows',    icon:'zap',      label:'Workflows'     },
+    { id:'builder',      icon:'plus',     label:'Builder'       },
+    { id:'integrations', icon:'plug',     label:'Integrations'  },
+    { id:'logs',         icon:'logs',     label:'Logs'          },
+    { id:'analytics',    icon:'chart',    label:'Analytics'     },
+    ...(user.role==='Admin' ? [{ id:'admin', icon:'settings', label:'Admin Panel' }] : []),
+  ];
+
+  return (
+    <div className="sidebar">
+      {/* Brand */}
+      <div style={{ padding:'16px 14px 12px', borderBottom:'1px solid var(--border)' }}>
+        <div className="flex gap-8">
+          <div style={{ width:32, height:32, background:'linear-gradient(135deg,var(--blue),var(--purple))', borderRadius:9, display:'flex', alignItems:'center', justifyContent:'center', fontSize:17, flexShrink:0 }}>⚡</div>
+          <div>
+            <div style={{ fontWeight:600, fontSize:14, color:'var(--text)' }}>FlowForge</div>
+            <div style={{ fontSize:10, color:'var(--text3)', fontFamily:'var(--mono)' }}>v2.5.0</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Tenant badge */}
+      <div style={{ padding:'8px 14px', borderBottom:'1px solid var(--border)' }}>
+        <div style={{ background:'var(--bg3)', borderRadius:'var(--r)', padding:'6px 10px', display:'flex', alignItems:'center', gap:7 }}>
+          <Icon name="building" size={12} color="var(--blue)"/>
+          <span style={{ fontSize:11, color:'var(--text2)', fontWeight:500 }}>{COMPANY_NAMES[user.company]||'Company'}</span>
+        </div>
+      </div>
+
+      {/* Nav */}
+      <div style={{ flex:1, overflowY:'auto', padding:'8px 8px' }}>
+        <p style={{ fontSize:10, color:'var(--text3)', padding:'6px 8px 4px', textTransform:'uppercase', letterSpacing:'.08em' }}>Navigation</p>
+        {nav.map(it => (
+          <button key={it.id} onClick={()=>setPage(it.id)}
+            className={`nav-item ${page===it.id?'active':''}`}>
+            <Icon name={it.icon} size={15} color={page===it.id?'var(--blue)':'var(--text3)'} className="nav-icon"/>
+            {it.label}
+          </button>
+        ))}
+      </div>
+
+      {/* User */}
+      <div style={{ padding:'12px 10px', borderTop:'1px solid var(--border)' }}>
+        <div className="flex gap-8" style={{ marginBottom:8 }}>
+          <Avatar initials={user.avatar} size={30} seed={user.id}/>
+          <div style={{ flex:1, minWidth:0 }}>
+            <div style={{ fontSize:12, fontWeight:500, color:'var(--text)' }} className="truncate">{user.name}</div>
+            <div style={{ fontSize:10, color:'var(--text3)' }}>{user.role}</div>
+          </div>
+        </div>
+        <button onClick={onLogout} className="btn btn-ghost full" style={{ justifyContent:'center', fontSize:12, color:'var(--text3)' }}>
+          <Icon name="logout" size={13}/> Sign out
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── TOPBAR ───────────────────────────────────────────────────────────────────
+function Topbar({ page, notifications, user }) {
+  const [showNotif, setShowNotif] = useState(false);
+  const LABELS = { dashboard:'Dashboard', workflows:'Workflows', builder:'Workflow Builder', integrations:'Integrations', logs:'Logs & Monitoring', analytics:'Analytics', admin:'Admin Panel' };
+  const unread = notifications.filter(n => Date.now()-n.ts < 120000).length;
+
+  return (
+    <div className="topbar" style={{ position:'relative' }}>
+      <span style={{ fontSize:14, fontWeight:500 }}>{LABELS[page]||page}</span>
+      <div style={{ flex:1 }}/>
+      <div className="flex gap-6" style={{ color:'var(--green)', fontSize:11 }}>
+        <span className="dot dot-green pulse-dot"/>Live
+      </div>
+      <div style={{ width:1, height:18, background:'var(--border)' }}/>
+      <span style={{ fontSize:11, color:'var(--text3)', fontFamily:'var(--mono)' }}>{user.email}</span>
+      <div style={{ position:'relative' }}>
+        <button className="btn btn-ghost" onClick={()=>setShowNotif(v=>!v)} style={{ padding:'6px 8px', position:'relative' }}>
+          <Icon name="bell" size={16}/>
+          {unread > 0 && <span style={{ position:'absolute', top:3, right:3, width:7, height:7, borderRadius:'50%', background:'var(--red)', animation:'pulse 1.2s infinite' }}/>}
+        </button>
+        {showNotif && (
+          <div className="notif-panel">
+            <div className="flex-between" style={{ padding:'11px 14px', borderBottom:'1px solid var(--border)' }}>
+              <span style={{ fontSize:13, fontWeight:500 }}>Notifications</span>
+              <button onClick={()=>setShowNotif(false)} className="btn-ghost btn" style={{ padding:'2px 6px' }}><Icon name="x" size={13}/></button>
+            </div>
+            <div style={{ maxHeight:300, overflowY:'auto' }}>
+              {notifications.length===0
+                ? <div className="empty" style={{ padding:20 }}>No notifications yet</div>
+                : [...notifications].reverse().slice(0,15).map((n,i) => (
+                    <div key={i} style={{ padding:'9px 14px', borderBottom:'1px solid var(--border)', display:'flex', gap:10, alignItems:'flex-start' }}>
+                      <span style={{ fontSize:16 }}>{n.status==='success'?'✅':'❌'}</span>
+                      <div>
+                        <div style={{ fontSize:12, fontWeight:500 }}>{n.workflowName}</div>
+                        <div style={{ fontSize:11, color:'var(--text2)' }}>{n.message}</div>
+                        <div style={{ fontSize:10, color:'var(--text3)', marginTop:2, fontFamily:'var(--mono)' }}>{timeAgo(n.ts)}</div>
+                      </div>
+                    </div>
+                  ))}
+            </div>
+          </div>
+        )}
+      </div>
+      <Avatar initials={user.avatar} size={28} seed={user.id}/>
+    </div>
+  );
+}
+
+// ─── DASHBOARD ────────────────────────────────────────────────────────────────
+function Dashboard({ workflows, logs, onSimulate, user }) {
+  const myWF = workflows.filter(w=>w.company===user.company);
+  const totalRuns   = myWF.reduce((a,b)=>a+b.runs,0);
+  const totalErrors = myWF.reduce((a,b)=>a+b.errors,0);
+  const active      = myWF.filter(w=>w.enabled).length;
+  const successRate = totalRuns ? Math.round(((totalRuns-totalErrors)/totalRuns)*100) : 100;
+
+  return (
+    <div className="anim-up">
+      <div className="section-header">
+        <h2>Dashboard</h2>
+        <p>Overview of your automation platform</p>
+      </div>
+
+      {/* Stats */}
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:12, marginBottom:20 }}>
+        {[
+          { label:'Active Workflows', value:active,                  color:'var(--green)',  icon:'zap'   },
+          { label:'Total Executions', value:totalRuns.toLocaleString(), color:'var(--blue)',  icon:'play'  },
+          { label:'Success Rate',     value:`${successRate}%`,       color: successRate>=95?'var(--green)':'var(--amber)', icon:'check' },
+          { label:'Failed Runs',      value:totalErrors,             color: totalErrors>0?'var(--red)':'var(--green)', icon:'warn' },
+        ].map((s,i) => (
+          <div key={i} className="stat-card">
+            <div className="flex-between">
+              <span className="stat-label">{s.label}</span>
+              <Icon name={s.icon} size={14} color={s.color}/>
+            </div>
+            <div className="stat-value" style={{ color:s.color }}>{s.value}</div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16, marginBottom:20 }}>
+        {/* Event Simulator */}
+        <div className="card" style={{ padding:18 }}>
+          <div className="flex-between" style={{ marginBottom:14 }}>
+            <h3>Event Simulator</h3>
+            <span className="badge badge-cyan">Event-Driven</span>
+          </div>
+          <p style={{ fontSize:12, marginBottom:14 }}>Fire mock events to trigger your active workflows instantly.</p>
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:7 }}>
+            {SIMULATE_EVENTS.map(ev => (
+              <button key={ev.id} onClick={()=>onSimulate(ev.id)} className="btn btn-secondary btn-sm" style={{ justifyContent:'flex-start', gap:6 }}>
+                <span>{ev.icon}</span> {ev.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Active Workflows List */}
+        <div className="card" style={{ padding:18 }}>
+          <h3 style={{ marginBottom:14 }}>Active Workflows</h3>
+          {myWF.filter(w=>w.enabled).length === 0
+            ? <div className="empty">No active workflows</div>
+            : <div style={{ display:'flex', flexDirection:'column', gap:7 }}>
+                {myWF.filter(w=>w.enabled).slice(0,5).map(w => {
+                  const t = getTrigger(w.trigger), a = getAction(w.action);
+                  return (
+                    <div key={w.id} style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 10px', background:'var(--bg3)', borderRadius:'var(--r)' }}>
+                      <span style={{ fontSize:16 }}>{t?.icon}</span>
+                      <div style={{ flex:1, minWidth:0 }}>
+                        <div style={{ fontSize:12, fontWeight:500 }} className="truncate">{w.name}</div>
+                        <div style={{ fontSize:10, color:'var(--text3)' }}>{timeAgo(w.lastRun)}</div>
+                      </div>
+                      <span style={{ fontSize:11, color:'var(--text2)', fontFamily:'var(--mono)' }}>{w.runs}×</span>
+                    </div>
+                  );
+                })}
+              </div>
+          }
+        </div>
+      </div>
+
+      {/* Recent Logs */}
+      <div className="card" style={{ padding:18 }}>
+        <h3 style={{ marginBottom:14 }}>Recent Activity</h3>
+        {logs.length===0
+          ? <div className="empty"><div className="empty-icon">📭</div>No activity. Simulate an event to get started!</div>
+          : <div style={{ display:'flex', flexDirection:'column', gap:5 }}>
+              {[...logs].reverse().slice(0,8).map((log,i) => <MiniLogRow key={i} log={log}/>)}
+            </div>
+        }
+      </div>
+    </div>
+  );
+}
+
+function MiniLogRow({ log }) {
+  const t = getTrigger(log.trigger), a = getAction(log.action);
+  const STATUS_COLOR = { success:'var(--green)', error:'var(--red)', running:'var(--blue)' };
+  return (
+    <div className="anim-up flex gap-10" style={{ padding:'7px 10px', background:'var(--bg3)', borderRadius:'var(--r)' }}>
+      <span className="dot" style={{ background: STATUS_COLOR[log.status]||'var(--text3)', animation: log.status==='running'?'pulse 1.5s infinite':'' }}/>
+      <span style={{ flex:1, fontSize:12, fontWeight:500 }} className="truncate">{log.workflowName}</span>
+      <span style={{ fontSize:11, color:'var(--text2)' }}>{t?.icon}→{a?.icon}</span>
+      <span className={`badge badge-${log.status==='success'?'green':log.status==='running'?'blue':'red'}`} style={{ fontSize:10 }}>{log.status}</span>
+      <span style={{ fontSize:10, color:'var(--text3)', minWidth:55, textAlign:'right', fontFamily:'var(--mono)' }}>{timeAgo(log.ts)}</span>
+    </div>
+  );
+}
+
+// ─── WORKFLOW LIST ─────────────────────────────────────────────────────────────
+function WorkflowList({ workflows, user, onToggle, onDelete, setPage, toast }) {
+  const [search, setSearch] = useState('');
+  const myWF = workflows.filter(w => w.company===user.company && w.name.toLowerCase().includes(search.toLowerCase()));
+
+  return (
+    <div className="anim-up">
+      <div className="flex-between" style={{ marginBottom:20 }}>
+        <div className="section-header" style={{ marginBottom:0 }}>
+          <h2>Workflows</h2>
+          <p>{myWF.length} workflows in your organization</p>
+        </div>
+        <button onClick={()=>setPage('builder')} className="btn btn-primary">
+          <Icon name="plus" size={14}/> New Workflow
+        </button>
+      </div>
+      <div className="search-wrap" style={{ marginBottom:14 }}>
+        <span className="search-icon"><Icon name="search" size={14}/></span>
+        <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search workflows…"/>
+      </div>
+      <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+        {myWF.length===0
+          ? <div className="empty card" style={{ padding:48 }}><div className="empty-icon">⚡</div>No workflows found. Build your first one!</div>
+          : myWF.map(w => <WorkflowRow key={w.id} w={w} user={user} onToggle={onToggle} onDelete={onDelete} toast={toast}/>)
+        }
+      </div>
+    </div>
+  );
+}
+
+function WorkflowRow({ w, user, onToggle, onDelete, toast }) {
+  const t = getTrigger(w.trigger), a = getAction(w.action);
+  const canEdit = user.role !== 'User';
+  const rate = w.runs ? Math.round(((w.runs-w.errors)/w.runs)*100) : 100;
+  return (
+    <div className="card card-hover anim-up" style={{ padding:'13px 18px', display:'flex', alignItems:'center', gap:14, opacity: w.enabled?1:.65 }}>
+      <div style={{ width:42, height:42, borderRadius:10, background:'var(--bg3)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:20, flexShrink:0 }}>{t?.icon||'⚡'}</div>
+      <div style={{ flex:1, minWidth:0 }}>
+        <div className="flex gap-8" style={{ marginBottom:4 }}>
+          <span style={{ fontSize:13, fontWeight:500 }} className="truncate">{w.name}</span>
+          {!w.enabled && <span className="badge badge-gray">Paused</span>}
+        </div>
+        <div className="flex gap-6" style={{ fontSize:11, color:'var(--text2)' }}>
+          <span style={{ background:'var(--bg3)', padding:'1px 7px', borderRadius:4, fontFamily:'var(--mono)' }}>{t?.label||w.trigger}</span>
+          <Icon name="arrow" size={10}/>
+          <span style={{ background:'var(--bg3)', padding:'1px 7px', borderRadius:4, fontFamily:'var(--mono)' }}>{a?.label||w.action}</span>
+        </div>
+      </div>
+      <div className="flex gap-16" style={{ fontSize:12 }}>
+        <div style={{ textAlign:'right' }}>
+          <div className="mono" style={{ fontWeight:500 }}>{w.runs}</div>
+          <div style={{ fontSize:10, color:'var(--text3)' }}>runs</div>
+        </div>
+        <div style={{ textAlign:'right' }}>
+          <div className="mono" style={{ fontWeight:500, color: w.errors>0?'var(--red)':'var(--green)' }}>{w.errors}</div>
+          <div style={{ fontSize:10, color:'var(--text3)' }}>errors</div>
+        </div>
+        <div style={{ textAlign:'right' }}>
+          <div style={{ fontSize:11, color:'var(--text2)' }}>{timeAgo(w.lastRun)}</div>
+          <div style={{ fontSize:10, color:'var(--text3)' }}>last run</div>
+        </div>
+        <div style={{ textAlign:'right' }}>
+          <div className="mono" style={{ fontSize:12, color: rate>=90?'var(--green)':rate>=70?'var(--amber)':'var(--red)', fontWeight:500 }}>{rate}%</div>
+          <div style={{ fontSize:10, color:'var(--text3)' }}>health</div>
+        </div>
+      </div>
+      {canEdit && (
+        <div className="flex gap-6">
+          <label className="switch">
+            <input type="checkbox" checked={w.enabled} onChange={()=>onToggle(w.id)}/>
+            <span className="switch-slider"/>
+          </label>
+          {user.role==='Admin' && (
+            <button onClick={()=>onDelete(w.id)} className="btn btn-danger btn-sm"><Icon name="trash" size={13}/></button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── WORKFLOW BUILDER ──────────────────────────────────────────────────────────
+function WorkflowBuilder({ onSave, user, toast }) {
+  const [name,    setName]    = useState('');
+  const [trigger, setTrigger] = useState('');
+  const [action,  setAction]  = useState('');
+  const [retries, setRetries] = useState(3);
+  const [desc,    setDesc]    = useState('');
+  const [loading, setLoad]    = useState(false);
+
+  const tInfo = getTrigger(trigger), aInfo = getAction(action);
+  const trigGroups = groupBy(TRIGGERS, 'cat'), actGroups = groupBy(ACTIONS, 'cat');
+
+  const handleSave = async () => {
+    if (!name||!trigger||!action) { toast('Please fill in all required fields','warning'); return; }
+    setLoad(true);
+    try {
+      const wf = await apiCall('/workflows', { method:'POST', body:{ name, trigger, action, enabled:true, retries, description:desc } });
+      onSave(wf);
+      toast(`Workflow "${name}" created successfully!`, 'success');
+      setName(''); setTrigger(''); setAction(''); setDesc('');
+    } catch (err) {
+      toast(err.message, 'error');
+    } finally { setLoad(false); }
+  };
+
+  return (
+    <div className="anim-up">
+      <div className="section-header">
+        <h2>Workflow Builder</h2>
+        <p>Define trigger → action logic to automate your business processes</p>
+      </div>
+
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 360px', gap:20 }}>
+        <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
+          {/* Name + Description */}
+          <div className="card" style={{ padding:18 }}>
+            <h3 style={{ marginBottom:14, fontSize:13 }}>Basic Information</h3>
+            <div style={{ marginBottom:12 }}>
+              <label>Workflow Name *</label>
+              <input value={name} onChange={e=>setName(e.target.value)} placeholder="e.g. Order → Email Confirmation"/>
+            </div>
+            <div>
+              <label>Description (optional)</label>
+              <input value={desc} onChange={e=>setDesc(e.target.value)} placeholder="What does this workflow do?"/>
+            </div>
+          </div>
+
+          {/* Trigger */}
+          <div className="card" style={{ padding:18 }}>
+            <div className="flex gap-8" style={{ marginBottom:14 }}>
+              <div style={{ width:26, height:26, background:'rgba(79,142,247,.15)', borderRadius:7, display:'flex', alignItems:'center', justifyContent:'center' }}>
+                <Icon name="zap" size={13} color="var(--blue)"/>
+              </div>
+              <h3 style={{ fontSize:13 }}>Trigger — When this happens</h3>
+            </div>
+            <label>Select Trigger Event *</label>
+            <select value={trigger} onChange={e=>setTrigger(e.target.value)}>
+              <option value="">Choose a trigger event…</option>
+              {Object.entries(trigGroups).map(([cat, items]) => (
+                <optgroup key={cat} label={`── ${cat} ──`}>
+                  {items.map(it => <option key={it.id} value={it.id}>{it.icon} {it.label}</option>)}
+                </optgroup>
+              ))}
+            </select>
+            {tInfo && (
+              <div style={{ marginTop:10, padding:'9px 12px', background:'rgba(79,142,247,.08)', border:'1px solid rgba(79,142,247,.2)', borderRadius:'var(--r)', display:'flex', alignItems:'center', gap:10 }}>
+                <span style={{ fontSize:22 }}>{tInfo.icon}</span>
+                <div>
+                  <div style={{ fontSize:12, fontWeight:500 }}>{tInfo.label}</div>
+                  <div style={{ fontSize:11, color:'var(--text2)' }}>Category: {tInfo.cat}</div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Action */}
+          <div className="card" style={{ padding:18 }}>
+            <div className="flex gap-8" style={{ marginBottom:14 }}>
+              <div style={{ width:26, height:26, background:'rgba(62,207,142,.15)', borderRadius:7, display:'flex', alignItems:'center', justifyContent:'center' }}>
+                <Icon name="play" size={13} color="var(--green)"/>
+              </div>
+              <h3 style={{ fontSize:13 }}>Action — Then do this</h3>
+            </div>
+            <label>Select Action *</label>
+            <select value={action} onChange={e=>setAction(e.target.value)}>
+              <option value="">Choose an action…</option>
+              {Object.entries(actGroups).map(([cat, items]) => (
+                <optgroup key={cat} label={`── ${cat} ──`}>
+                  {items.map(it => <option key={it.id} value={it.id}>{it.icon} {it.label}</option>)}
+                </optgroup>
+              ))}
+            </select>
+            {aInfo && (
+              <div style={{ marginTop:10, padding:'9px 12px', background:'rgba(62,207,142,.08)', border:'1px solid rgba(62,207,142,.2)', borderRadius:'var(--r)', display:'flex', alignItems:'center', gap:10 }}>
+                <span style={{ fontSize:22 }}>{aInfo.icon}</span>
+                <div>
+                  <div style={{ fontSize:12, fontWeight:500 }}>{aInfo.label}</div>
+                  <div style={{ fontSize:11, color:'var(--text2)' }}>Category: {aInfo.cat}</div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Error handling */}
+          <div className="card" style={{ padding:18 }}>
+            <h3 style={{ fontSize:13, marginBottom:14 }}>Error Handling & Retry</h3>
+            <div className="flex gap-10">
+              <label style={{ margin:0 }}>Max retries on failure:</label>
+              <select value={retries} onChange={e=>setRetries(Number(e.target.value))} style={{ width:80 }}>
+                {[0,1,2,3,5].map(n => <option key={n} value={n}>{n}×</option>)}
+              </select>
+            </div>
+            <p style={{ fontSize:11, marginTop:8, color:'var(--text3)' }}>Failed actions will be retried up to {retries} time(s) with exponential backoff.</p>
+          </div>
+
+          <button onClick={handleSave} className="btn btn-primary" style={{ height:44, fontSize:14, justifyContent:'center' }} disabled={loading}>
+            {loading ? <><span className="spinner"/> Creating…</> : <><Icon name="zap" size={15}/> Create Workflow</>}
+          </button>
+        </div>
+
+        {/* Flow Preview */}
+        <div>
+          <div className="card" style={{ padding:18, position:'sticky', top:0 }}>
+            <h3 style={{ fontSize:13, marginBottom:16 }}>Flow Preview</h3>
+            <div style={{ display:'flex', flexDirection:'column', alignItems:'stretch', gap:0 }}>
+              <BuilderNode icon={tInfo?.icon||'?'} label={tInfo?.label||'Select trigger'} type="TRIGGER" active={!!tInfo} color="var(--blue)"/>
+              <div style={{ width:2, height:24, background: tInfo&&aInfo?'var(--blue)':'var(--border2)', margin:'0 auto', position:'relative' }}>
+                {tInfo&&aInfo && <div style={{ position:'absolute', left:'50%', top:'50%', transform:'translate(-50%,-50%)', width:8, height:8, borderRadius:'50%', background:'var(--blue)', animation:'pulse 2s infinite' }}/>}
+              </div>
+              <BuilderNode icon={aInfo?.icon||'?'} label={aInfo?.label||'Select action'} type="ACTION" active={!!aInfo} color="var(--green)"/>
+            </div>
+            {name && trigger && action && (
+              <div style={{ marginTop:16, padding:12, background:'rgba(79,142,247,.07)', border:'1px solid rgba(79,142,247,.18)', borderRadius:'var(--r)', fontSize:12, lineHeight:1.7 }}>
+                <div style={{ fontWeight:500, color:'var(--blue)', marginBottom:4 }}>"{name}"</div>
+                When <b style={{ color:'var(--text)' }}>{tInfo?.label}</b> fires →<br/>
+                Execute <b style={{ color:'var(--text)' }}>{aInfo?.label}</b><br/>
+                <span style={{ color:'var(--text3)', fontSize:11 }}>Retry: {retries}× on failure</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function BuilderNode({ icon, label, type, active, color }) {
+  return (
+    <div className="flow-node" style={{ border:`1px solid ${active?color+'40':'var(--border)'}`, background: active?`${color}0a`:'var(--bg3)' }}>
+      <div style={{ width:38, height:38, borderRadius:9, background: active?`${color}18`:'var(--bg4)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:18, flexShrink:0 }}>{icon}</div>
+      <div>
+        <div style={{ fontSize:9, color: active?color:'var(--text3)', textTransform:'uppercase', letterSpacing:'.1em', fontWeight:500, fontFamily:'var(--mono)' }}>{type}</div>
+        <div style={{ fontSize:12, fontWeight:500, color: active?'var(--text)':'var(--text3)' }}>{label}</div>
+      </div>
+    </div>
+  );
+}
+
+// ─── INTEGRATIONS ──────────────────────────────────────────────────────────────
+function Integrations({ toast }) {
+  const [integrations, setIntegrations] = useState([]);
+  const [loading, setLoad] = useState(true);
+
+  useEffect(() => {
+    apiCall('/integrations')
+      .then(setIntegrations)
+      .catch(()=>{})
+      .finally(()=>setLoad(false));
+  }, []);
+
+  const toggle = async (id) => {
+    try {
+      const updated = await apiCall(`/integrations/${id}/toggle`, { method:'PATCH' });
+      setIntegrations(prev => prev.map(i => i.id===id ? updated : i));
+      toast(`${updated.name} ${updated.status}`, updated.status==='connected'?'success':'info');
+    } catch (err) { toast(err.message, 'error'); }
+  };
+
+  return (
+    <div className="anim-up">
+      <div className="section-header">
+        <h2>Integrations</h2>
+        <p>Connect your applications to enable workflow actions (simulated APIs)</p>
+      </div>
+      {loading
+        ? <div style={{ textAlign:'center', padding:40 }}><span className="spinner"/></div>
+        : <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(250px,1fr))', gap:12 }}>
+            {integrations.map(int => (
+              <div key={int.id} className="card card-hover" style={{ padding:16 }}>
+                <div className="flex gap-10" style={{ marginBottom:12 }}>
+                  <div style={{ width:44, height:44, borderRadius:10, background:'var(--bg3)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:22 }}>{int.icon}</div>
+                  <div style={{ flex:1 }}>
+                    <div style={{ fontWeight:500, fontSize:13 }}>{int.name}</div>
+                    <div style={{ fontSize:10, color:'var(--text3)' }}>{int.category}</div>
+                  </div>
+                  <span className={`badge badge-${int.status==='connected'?'green':'gray'}`}>
+                    <span className="dot" style={{ width:5,height:5, background: int.status==='connected'?'var(--green)':'var(--text3)' }}/>
+                    {int.status}
+                  </span>
+                </div>
+                <div className="flex-between" style={{ marginBottom:12 }}>
+                  <span style={{ fontSize:11, color:'var(--text3)' }}>{int.calls.toLocaleString()} API calls</span>
+                  <span style={{ fontSize:10, color:'var(--text3)', fontFamily:'var(--mono)' }}>Mock</span>
+                </div>
+                <button onClick={()=>toggle(int.id)} className={`btn ${int.status==='connected'?'btn-danger':'btn-success'} full btn-sm`} style={{ justifyContent:'center' }}>
+                  {int.status==='connected' ? 'Disconnect' : 'Connect Integration'}
+                </button>
+              </div>
+            ))}
+          </div>
+      }
+    </div>
+  );
+}
+
+// ─── LOGS ─────────────────────────────────────────────────────────────────────
+function Logs({ logs, onClear, user }) {
+  const [filter, setFilter] = useState('all');
+  const myLogs  = logs.filter(l => l.company===user.company);
+  const shown   = filter==='all' ? myLogs : myLogs.filter(l=>l.status===filter);
+  const display = [...shown].reverse();
+
+  return (
+    <div className="anim-up">
+      <div className="flex-between" style={{ marginBottom:18 }}>
+        <div className="section-header" style={{ marginBottom:0 }}>
+          <h2>Logs & Monitoring</h2>
+          <p>{myLogs.length} total execution records</p>
+        </div>
+        <div className="flex gap-6">
+          {['all','success','error','running'].map(f => (
+            <button key={f} onClick={()=>setFilter(f)} className={`btn btn-sm ${filter===f?'btn-primary':'btn-secondary'}`} style={{ textTransform:'capitalize' }}>{f}</button>
+          ))}
+          <button onClick={onClear} className="btn btn-ghost btn-sm" style={{ color:'var(--red)' }}>
+            <Icon name="trash" size={13}/> Clear
+          </button>
+        </div>
+      </div>
+
+      {display.length===0
+        ? <div className="empty card" style={{ padding:60 }}><div className="empty-icon">📋</div>No logs yet. Simulate events to see execution records.</div>
+        : <div className="card" style={{ overflow:'hidden' }}>
+            <table>
+              <thead>
+                <tr>
+                  {['Status','Workflow','Trigger','Action','Duration','Retries','Time'].map(h => (
+                    <th key={h}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {display.map((log,i) => {
+                  const t = getTrigger(log.trigger), a = getAction(log.action);
+                  return (
+                    <tr key={i} className="anim-up">
+                      <td>
+                        <span className={`badge badge-${log.status==='success'?'green':log.status==='running'?'blue':'red'}`}>
+                          <span className="dot" style={{ width:5,height:5, background: log.status==='success'?'var(--green)':log.status==='running'?'var(--blue)':'var(--red)', animation: log.status==='running'?'pulse 1.5s infinite':'' }}/>
+                          {log.status}
+                        </span>
+                      </td>
+                      <td style={{ fontWeight:500, maxWidth:180 }} className="truncate">{log.workflowName}</td>
+                      <td style={{ color:'var(--text2)' }}>{t?.icon} {t?.label||log.trigger}</td>
+                      <td style={{ color:'var(--text2)' }}>{a?.icon} {a?.label||log.action}</td>
+                      <td style={{ fontFamily:'var(--mono)', color:'var(--text3)' }}>{log.duration||'—'}ms</td>
+                      <td style={{ fontFamily:'var(--mono)', color: log.retries>0?'var(--amber)':'var(--text3)' }}>{log.retries||0}</td>
+                      <td style={{ fontFamily:'var(--mono)', color:'var(--text3)' }}>{timeAgo(log.ts)}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+      }
+    </div>
+  );
+}
+
+// ─── ANALYTICS ────────────────────────────────────────────────────────────────
+function Analytics({ workflows, logs, user }) {
+  const myWF   = workflows.filter(w=>w.company===user.company);
+  const myLogs = logs.filter(l=>l.company===user.company);
+  const success = myLogs.filter(l=>l.status==='success').length;
+  const errors  = myLogs.filter(l=>l.status==='error').length;
+  const trigCounts = myLogs.reduce((acc,l)=>{ acc[l.trigger]=(acc[l.trigger]||0)+1; return acc; }, {});
+  const topTriggers = Object.entries(trigCounts).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const maxCount = Math.max(...topTriggers.map(([,v])=>v), 1);
+
+  return (
+    <div className="anim-up">
+      <div className="section-header">
+        <h2>Analytics</h2>
+        <p>Performance insights for your automation workflows</p>
+      </div>
+
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:12, marginBottom:20 }}>
+        {[
+          { label:'Workflows',    value: myWF.length,     color:'var(--text)'   },
+          { label:'Executions',   value: myLogs.length,   color:'var(--blue)'   },
+          { label:'Succeeded',    value: success,          color:'var(--green)'  },
+          { label:'Failed',       value: errors,           color: errors>0?'var(--red)':'var(--green)' },
+        ].map((s,i) => (
+          <div key={i} className="stat-card">
+            <div className="stat-label">{s.label}</div>
+            <div className="stat-value" style={{ color:s.color }}>{s.value}</div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16 }}>
+        {/* Top Triggers */}
+        <div className="card" style={{ padding:18 }}>
+          <h3 style={{ marginBottom:16, fontSize:13 }}>Top Trigger Events</h3>
+          {topTriggers.length===0
+            ? <div className="empty">No data yet. Simulate events!</div>
+            : <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+                {topTriggers.map(([tid, count]) => {
+                  const t = getTrigger(tid);
+                  const pct = Math.round((count/maxCount)*100);
+                  return (
+                    <div key={tid}>
+                      <div className="flex-between" style={{ marginBottom:5 }}>
+                        <span style={{ fontSize:12 }}>{t?.icon} {t?.label||tid}</span>
+                        <span style={{ fontSize:12, fontFamily:'var(--mono)', color:'var(--text2)', fontWeight:500 }}>{count}</span>
+                      </div>
+                      <div className="progress-track">
+                        <div className="progress-fill" style={{ width:`${pct}%`, background:'var(--blue)' }}/>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+          }
+        </div>
+
+        {/* Workflow Health */}
+        <div className="card" style={{ padding:18 }}>
+          <h3 style={{ marginBottom:16, fontSize:13 }}>Workflow Health</h3>
+          <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+            {myWF.map(w => {
+              const rate = w.runs ? Math.round(((w.runs-w.errors)/w.runs)*100) : 100;
+              const color = rate>=90?'var(--green)':rate>=70?'var(--amber)':'var(--red)';
+              return (
+                <div key={w.id}>
+                  <div className="flex-between" style={{ marginBottom:4 }}>
+                    <span style={{ fontSize:12 }} className="truncate">{w.name}</span>
+                    <span style={{ fontSize:12, fontFamily:'var(--mono)', fontWeight:500, color, marginLeft:8 }}>{rate}%</span>
+                  </div>
+                  <div className="progress-track">
+                    <div className="progress-fill" style={{ width:`${rate}%`, background:color }}/>
+                  </div>
+                </div>
+              );
+            })}
+            {myWF.length===0 && <div className="empty">No workflows yet</div>}
+          </div>
+        </div>
+
+        {/* Execution Breakdown */}
+        <div className="card" style={{ padding:18 }}>
+          <h3 style={{ marginBottom:16, fontSize:13 }}>Execution Breakdown</h3>
+          {myLogs.length===0
+            ? <div className="empty">Run some workflows first</div>
+            : <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+                {[
+                  { label:'Success', value:success, color:'var(--green)', pct: Math.round((success/myLogs.length)*100) },
+                  { label:'Failed',  value:errors,  color:'var(--red)',   pct: Math.round((errors/myLogs.length)*100)  },
+                  { label:'Running', value: myLogs.filter(l=>l.status==='running').length, color:'var(--blue)', pct: Math.round((myLogs.filter(l=>l.status==='running').length/myLogs.length)*100) },
+                ].map(s => (
+                  <div key={s.label}>
+                    <div className="flex-between" style={{ marginBottom:4 }}>
+                      <span style={{ fontSize:12, color: s.color }}>{s.label}</span>
+                      <span style={{ fontSize:12, fontFamily:'var(--mono)' }}>{s.value} <span style={{ color:'var(--text3)' }}>({s.pct}%)</span></span>
+                    </div>
+                    <div className="progress-track">
+                      <div className="progress-fill" style={{ width:`${s.pct}%`, background:s.color }}/>
+                    </div>
+                  </div>
+                ))}
+              </div>
+          }
+        </div>
+
+        {/* Action Distribution */}
+        <div className="card" style={{ padding:18 }}>
+          <h3 style={{ marginBottom:16, fontSize:13 }}>Most Used Actions</h3>
+          {(() => {
+            const actCounts = myLogs.reduce((acc,l)=>{ acc[l.action]=(acc[l.action]||0)+1; return acc; }, {});
+            const top = Object.entries(actCounts).sort((a,b)=>b[1]-a[1]).slice(0,5);
+            const mx = Math.max(...top.map(([,v])=>v), 1);
+            return top.length===0
+              ? <div className="empty">No data yet</div>
+              : top.map(([aid, count]) => {
+                  const a = getAction(aid);
+                  return (
+                    <div key={aid} style={{ marginBottom:10 }}>
+                      <div className="flex-between" style={{ marginBottom:4 }}>
+                        <span style={{ fontSize:12 }}>{a?.icon} {a?.label||aid}</span>
+                        <span style={{ fontSize:12, fontFamily:'var(--mono)', color:'var(--text2)' }}>{count}</span>
+                      </div>
+                      <div className="progress-track">
+                        <div className="progress-fill" style={{ width:`${Math.round((count/mx)*100)}%`, background:'var(--purple)' }}/>
+                      </div>
+                    </div>
+                  );
+                });
+          })()}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── ADMIN PANEL ───────────────────────────────────────────────────────────────
+function AdminPanel({ workflows, toast }) {
+  const [tab,   setTab]   = useState('users');
+  const [users, setUsers] = useState([]);
+  const [companies, setCompanies] = useState([]);
+  const [loadU, setLoadU] = useState(true);
+  const [loadC, setLoadC] = useState(true);
+
+  useEffect(()=>{
+    apiCall('/admin/users').then(setUsers).catch(()=>{}).finally(()=>setLoadU(false));
+    apiCall('/admin/companies').then(setCompanies).catch(()=>{}).finally(()=>setLoadC(false));
+  }, []);
+
+  const toggleUser = async (id) => {
+    try {
+      const updated = await apiCall(`/admin/users/${id}/toggle`, { method:'PATCH' });
+      setUsers(prev => prev.map(u => u.id===id ? updated : u));
+      toast('User status updated', 'info');
+    } catch (err) { toast(err.message, 'error'); }
+  };
+
+  return (
+    <div className="anim-up">
+      <div className="section-header">
+        <h2>Admin Panel</h2>
+        <p>Multi-tenant management — users, companies, and platform overview</p>
+      </div>
+
+      <div className="flex gap-6" style={{ marginBottom:18 }}>
+        {['users','companies','overview'].map(t => (
+          <button key={t} onClick={()=>setTab(t)} className={`btn btn-sm ${tab===t?'btn-primary':'btn-secondary'}`} style={{ textTransform:'capitalize' }}>{t}</button>
+        ))}
+      </div>
+
+      {tab==='users' && (
+        loadU ? <div style={{ textAlign:'center', padding:40 }}><span className="spinner"/></div> :
+        <div className="card" style={{ overflow:'hidden' }}>
+          <table>
+            <thead><tr>{['User','Email','Role','Company','Status','Action'].map(h=><th key={h}>{h}</th>)}</tr></thead>
+            <tbody>
+              {users.map(u => (
+                <tr key={u.id}>
+                  <td>
+                    <div className="flex gap-8">
+                      <Avatar initials={u.avatar} size={28} seed={u.id}/>
+                      <span style={{ fontWeight:500 }}>{u.name}</span>
+                    </div>
+                  </td>
+                  <td style={{ color:'var(--text2)' }}>{u.email}</td>
+                  <td><span className={`badge badge-${u.role==='Admin'?'purple':u.role==='Manager'?'blue':'gray'}`}>{u.role}</span></td>
+                  <td style={{ color:'var(--text2)' }}>{u.company==='c1'?'Acme Corp':'Neon Labs'}</td>
+                  <td><span className={`badge badge-${u.active?'green':'red'}`}>{u.active?'Active':'Inactive'}</span></td>
+                  <td>
+                    <button onClick={()=>toggleUser(u.id)} className="btn btn-ghost btn-sm">{u.active?'Deactivate':'Activate'}</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {tab==='companies' && (
+        loadC ? <div style={{ textAlign:'center', padding:40 }}><span className="spinner"/></div> :
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))', gap:12 }}>
+          {companies.map(c => (
+            <div key={c.id} className="card" style={{ padding:18 }}>
+              <div className="flex gap-10" style={{ marginBottom:14 }}>
+                <div style={{ width:44, height:44, borderRadius:11, background:'var(--bg3)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:22 }}>🏢</div>
+                <div>
+                  <div style={{ fontWeight:500, fontSize:14 }}>{c.name}</div>
+                  <span className={`badge badge-${c.plan==='Enterprise'?'purple':'blue'}`} style={{ fontSize:10 }}>{c.plan}</span>
+                </div>
+              </div>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
+                {[{ label:'Users', value:c.users },{ label:'Workflows', value:c.workflows }].map((s,i)=>(
+                  <div key={i} style={{ background:'var(--bg3)', borderRadius:'var(--r)', padding:'8px 10px' }}>
+                    <div style={{ fontSize:10, color:'var(--text3)', marginBottom:2 }}>{s.label}</div>
+                    <div style={{ fontSize:20, fontWeight:600, fontFamily:'var(--mono)' }}>{s.value}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {tab==='overview' && (
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:12 }}>
+          {[
+            { label:'Total Companies', value: companies.length || 2, icon:'building', color:'var(--cyan)' },
+            { label:'Total Users',     value: users.length || 4,     icon:'users',    color:'var(--blue)' },
+            { label:'Total Workflows', value: workflows.length,       icon:'zap',      color:'var(--purple)' },
+          ].map((s,i) => (
+            <div key={i} className="stat-card">
+              <div className="flex gap-8" style={{ marginBottom:8 }}>
+                <Icon name={s.icon} size={15} color={s.color}/>
+                <span className="stat-label">{s.label}</span>
+              </div>
+              <div className="stat-value" style={{ color:s.color }}>{s.value}</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── MAIN APP ──────────────────────────────────────────────────────────────────
+function App() {
+  const [user,          setUser]    = useState(null);
+  const [page,          setPage]    = useState('dashboard');
+  const [workflows,     setWFs]     = useState([]);
+  const [logs,          setLogs]    = useState([]);
+  const [notifications, setNotifs]  = useState([]);
+  const { toasts, toast }           = useToast();
+
+  // Load workflows on login
+  useEffect(() => {
+    if (!user) return;
+    apiCall('/workflows').then(setWFs).catch(()=>{});
+    // Poll logs and notifications every 2 seconds
+    const interval = setInterval(() => {
+      apiCall('/logs').then(data => setLogs([...data].reverse())).catch(()=>{});
+      apiCall('/notifications').then(setNotifs).catch(()=>{});
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [user]);
+
+  // Simulate event
+  const simulate = useCallback(async (eventId) => {
+    try {
+      const result = await apiCall(`/simulate/${eventId}`, { method:'POST', body:{} });
+      if (result.fired === 0) {
+        toast(`No active workflows for this trigger. Create one in Builder!`, 'warning');
+      } else {
+        const trig = TRIGGERS.find(t=>t.id===eventId);
+        toast(`${trig?.icon} ${trig?.label} fired → ${result.fired} workflow(s) triggered`, 'success');
+      }
+    } catch (err) { toast(err.message, 'error'); }
+  }, [toast]);
+
+  // Workflow CRUD
+  const addWorkflow   = useCallback(wf => setWFs(prev => [...prev, wf]), []);
+  const toggleWF      = useCallback(async (id) => {
+    try {
+      const updated = await apiCall(`/workflows/${id}/toggle`, { method:'PATCH' });
+      setWFs(prev => prev.map(w => w.id===id ? updated : w));
+      toast(`Workflow ${updated.enabled?'enabled':'paused'}`, 'info');
+    } catch (err) { toast(err.message, 'error'); }
+  }, [toast]);
+  const deleteWF      = useCallback(async (id) => {
+    try {
+      await apiCall(`/workflows/${id}`, { method:'DELETE' });
+      setWFs(prev => prev.filter(w => w.id!==id));
+      toast('Workflow deleted', 'info');
+    } catch (err) { toast(err.message, 'error'); }
+  }, [toast]);
+  const clearLogs     = useCallback(async () => {
+    try {
+      await apiCall('/logs', { method:'DELETE' });
+      setLogs([]);
+      toast('Logs cleared', 'info');
+    } catch (err) { toast(err.message, 'error'); }
+  }, [toast]);
+
+  if (!user) return <AuthScreen onLogin={u => { setUser(u); setPage('dashboard'); }}/>;
+
+  const pages = {
+    dashboard:    <Dashboard    workflows={workflows} logs={logs} onSimulate={simulate} user={user}/>,
+    workflows:    <WorkflowList workflows={workflows} user={user} onToggle={toggleWF} onDelete={deleteWF} setPage={setPage} toast={toast}/>,
+    builder:      <WorkflowBuilder onSave={addWorkflow} user={user} toast={toast}/>,
+    integrations: <Integrations toast={toast}/>,
+    logs:         <Logs logs={logs} onClear={clearLogs} user={user}/>,
+    analytics:    <Analytics workflows={workflows} logs={logs} user={user}/>,
+    admin:        <AdminPanel workflows={workflows} toast={toast}/>,
+  };
+
+  return (
+    <div className="app-layout">
+      <Sidebar page={page} setPage={setPage} user={user} onLogout={()=>{ sessionStorage.removeItem('ff_token'); setUser(null); setWFs([]); setLogs([]); }}/>
+      <div className="main">
+        <Topbar page={page} notifications={notifications} user={user}/>
+        <div className="page">{pages[page] || pages.dashboard}</div>
+      </div>
+      <Toasts toasts={toasts}/>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
