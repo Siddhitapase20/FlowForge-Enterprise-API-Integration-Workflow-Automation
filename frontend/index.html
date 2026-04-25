@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FlowForge – Workflow Automation Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f5f6fa;
+  --white:#ffffff;
+  --border:#e2e6ed;
+  --border2:#d0d5dd;
+  --text:#1a1d23;
+  --text2:#5a6478;
+  --text3:#9aa0ad;
+  --blue:#2563eb;
+  --blue-light:#eff4ff;
+  --blue-dark:#1d4ed8;
+  --green:#16a34a;
+  --green-light:#f0fdf4;
+  --red:#dc2626;
+  --red-light:#fef2f2;
+  --amber:#d97706;
+  --amber-light:#fffbeb;
+  --purple:#7c3aed;
+  --purple-light:#f5f3ff;
+  --sidebar-w:220px;
+  --topbar-h:56px;
+  --radius:8px;
+  --shadow:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.04);
+  --shadow-md:0 4px 12px rgba(0,0,0,.08);
+}
+body{font-family:'Inter',sans-serif;font-size:14px;color:var(--text);background:var(--bg);line-height:1.5}
+#root{height:100vh;display:flex;flex-direction:column;overflow:hidden}
+
+/* scrollbar */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* animations */
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+@keyframes slideR{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
+
+/* layout */
+.shell{display:flex;height:100%;overflow:hidden}
+.sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{height:var(--topbar-h);min-height:var(--topbar-h);background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:12px}
+.page{flex:1;overflow-y:auto;padding:24px;background:var(--bg)}
+.shell.nav-collapsed .sidebar{width:72px;min-width:72px}
+.shell.nav-collapsed .logo-wrap{justify-content:center;padding:16px 8px}
+.shell.nav-collapsed .logo-text{display:none}
+.shell.nav-collapsed .nav-section-title{display:none}
+.shell.nav-collapsed .nav-link{justify-content:center;padding:8px 10px}
+.shell.nav-collapsed .nav-link span:not(.ni){display:none}
+.shell.nav-collapsed .workspace-card-wrap{display:none}
+.shell.nav-collapsed .sidebar-footer{padding:12px 8px;text-align:center}
+.shell.nav-collapsed .sidebar-footer > div{display:none}
+
+/* sidebar */
+.logo-wrap{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.logo-icon{width:32px;height:32px;background:var(--blue);border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px}
+.logo-text{font-weight:700;font-size:15px;letter-spacing:-.3px}
+.logo-text em{font-style:normal;color:var(--blue)}
+
+.nav-group{padding:12px 0}
+.nav-section-title{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;padding:0 20px;margin-bottom:4px}
+.nav-link{display:flex;align-items:center;gap:9px;padding:7px 20px;cursor:pointer;color:var(--text2);font-size:13.5px;transition:.12s;border-radius:0;margin:1px 8px;border-radius:6px}
+.nav-link:hover{background:var(--bg);color:var(--text)}
+.nav-link.active{background:var(--blue-light);color:var(--blue);font-weight:600}
+.nav-link .ni{font-size:15px;width:18px;text-align:center}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:9px;min-width:16px;text-align:center}
+
+.sidebar-footer{margin-top:auto;padding:16px 20px;border-top:1px solid var(--border)}
+.online-dot{width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block;animation:pulse 2s infinite;margin-right:5px}
+
+/* topbar */
+.topbar-title{font-weight:600;font-size:15px;color:var(--text)}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.user-pill{display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:4px 14px 4px 4px;cursor:pointer}
+.avatar{width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.user-info{line-height:1.2}
+.user-name{font-size:12.5px;font-weight:600}
+.user-role{font-size:10px;color:var(--blue);font-family:'JetBrains Mono',monospace}
+.nav-toggle{width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;padding:0}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--radius);font-size:13px;font-weight:500;cursor:pointer;border:1px solid transparent;transition:.12s;font-family:inherit;line-height:1}
+.btn:hover{filter:brightness(.96)}
+.btn:active{transform:translateY(1px)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none!important}
+.btn-primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+.btn-primary:hover{background:var(--blue-dark);filter:none}
+.btn-default{background:var(--white);color:var(--text);border-color:var(--border2)}
+.btn-danger{background:var(--white);color:var(--red);border-color:var(--border2)}
+.btn-danger:hover{background:var(--red-light)}
+.btn-success{background:var(--white);color:var(--green);border-color:var(--border2)}
+.btn-success:hover{background:var(--green-light)}
+.btn-sm{padding:4px 10px;font-size:12px}
+.btn-lg{padding:9px 20px;font-size:14px}
+
+/* cards */
+.card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);animation:fadeUp .25s ease}
+.card-sm{padding:14px}
+.card-title{font-weight:600;font-size:14px;color:var(--text);margin-bottom:14px}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+
+/* badges */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:600;white-space:nowrap}
+.badge-success{background:var(--green-light);color:var(--green)}
+.badge-error{background:var(--red-light);color:var(--red)}
+.badge-warn{background:var(--amber-light);color:var(--amber)}
+.badge-info{background:var(--blue-light);color:var(--blue)}
+.badge-idle{background:var(--bg);color:var(--text2);border:1px solid var(--border)}
+.bdot{width:5px;height:5px;border-radius:50%;background:currentColor}
+
+/* stats */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.stat-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);animation:fadeUp .3s ease}
+.stat-val{font-size:26px;font-weight:700;line-height:1;margin-bottom:4px}
+.stat-lbl{font-size:12px;color:var(--text2)}
+.stat-change{font-size:11px;margin-top:8px;color:var(--text3)}
+.stat-up{color:var(--green)}
+
+/* tables */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{background:var(--bg);color:var(--text2);font-size:11px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;padding:9px 14px;text-align:left;border-bottom:1px solid var(--border)}
+tbody tr{border-bottom:1px solid var(--border);transition:.1s}
+tbody tr:hover{background:var(--bg)}
+tbody td{padding:10px 14px;color:var(--text)}
+tbody tr:last-child{border-bottom:none}
+
+/* forms */
+.form-group{margin-bottom:14px}
+.form-label{display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:5px}
+.form-input,.form-select,.form-textarea{width:100%;background:var(--white);border:1px solid var(--border2);border-radius:var(--radius);padding:8px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none;transition:.12s}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.08)}
+.form-select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%235a6478' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;appearance:none;padding-right:28px}
+.form-textarea{resize:vertical;min-height:80px}
+
+/* grid helpers */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.flex{display:flex}.items-center{align-items:center}.justify-between{justify-content:space-between}
+.gap-2{gap:8px}.gap-3{gap:12px}.gap-4{gap:16px}
+.mb-1{margin-bottom:4px}.mb-2{margin-bottom:8px}.mb-3{margin-bottom:12px}.mb-4{margin-bottom:16px}.mb-5{margin-bottom:20px}
+.mt-2{margin-top:8px}.mt-3{margin-top:12px}.mt-4{margin-top:16px}
+.flex-1{flex:1}.w-full{width:100%}
+.text-sm{font-size:12px}.text-xs{font-size:11px}.text-muted{color:var(--text2)}.text-blue{color:var(--blue)}.text-green{color:var(--green)}.text-red{color:var(--red)}
+.font-mono{font-family:'JetBrains Mono',monospace}
+.truncate{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.page-title{font-size:18px;font-weight:700;margin-bottom:4px}
+.page-sub{font-size:13px;color:var(--text2);margin-bottom:20px}
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0}
+
+/* modal */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;display:flex;align-items:center;justify-content:center;animation:fadeIn .15s ease}
+.modal{background:var(--white);border-radius:10px;padding:24px;width:520px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-md);animation:fadeUp .2s ease}
+.modal-title{font-weight:700;font-size:16px;margin-bottom:18px}
+.modal-footer{display:flex;justify-content:flex-end;gap:8px;padding-top:16px;margin-top:16px;border-top:1px solid var(--border)}
+
+/* toast */
+.toast-wrap{position:fixed;bottom:20px;right:20px;z-index:999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:11px 14px;min-width:270px;display:flex;align-items:center;gap:9px;animation:slideR .25s ease;pointer-events:all;box-shadow:var(--shadow-md);font-size:13px}
+.toast.success{border-left:3px solid var(--green)}
+.toast.error{border-left:3px solid var(--red)}
+.toast.info{border-left:3px solid var(--blue)}
+.toast.warn{border-left:3px solid var(--amber)}
+
+/* workflow card */
+.wf-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:8px;box-shadow:var(--shadow);animation:fadeUp .2s ease;cursor:pointer;transition:.12s}
+.wf-card:hover{border-color:var(--border2)}
+.wf-card.selected{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.08)}
+.wf-expand{padding-top:12px;margin-top:12px;border-top:1px solid var(--border);animation:fadeUp .15s ease}
+
+/* integration card */
+.int-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);transition:.12s}
+.int-card:hover{border-color:var(--border2)}
+.int-card.connected{border-color:rgba(22,163,74,.3)}
+.int-icon{font-size:24px;margin-bottom:10px}
+.int-name{font-weight:600;font-size:13.5px}
+.int-desc{font-size:11.5px;color:var(--text2);margin-top:2px;margin-bottom:10px}
+
+/* event buttons */
+.evt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.evt-btn{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:14px;cursor:pointer;text-align:left;transition:.12s;box-shadow:var(--shadow)}
+.evt-btn:hover{border-color:var(--blue);background:var(--blue-light)}
+.evt-btn:active{transform:translateY(1px)}
+.evt-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.evt-icon{font-size:22px;margin-bottom:6px}
+.evt-name{font-size:13px;font-weight:600}
+.evt-desc{font-size:11px;color:var(--text2);margin-top:2px}
+
+/* log rows */
+.log-row{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);animation:fadeUp .15s ease}
+.log-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+.log-icon.success{background:var(--green-light);color:var(--green)}
+.log-icon.error{background:var(--red-light);color:var(--red)}
+
+/* step wizard */
+.steps{display:flex;align-items:center;gap:0;margin-bottom:24px}
+.step-item{display:flex;align-items:center;gap:0}
+.step-circle{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border:2px solid var(--border2);color:var(--text2);transition:.2s;cursor:pointer}
+.step-circle.done{background:var(--blue);border-color:var(--blue);color:#fff}
+.step-circle.current{border-color:var(--blue);color:var(--blue)}
+.step-label{font-size:12px;margin-left:6px;color:var(--text2);font-weight:500}
+.step-label.current{color:var(--blue);font-weight:600}
+.step-line{flex:1;height:2px;background:var(--border);margin:0 8px;transition:.2s}
+.step-line.done{background:var(--blue)}
+
+/* action/trigger selector */
+.sel-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px}
+.sel-item{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;cursor:pointer;transition:.12s}
+.sel-item:hover{border-color:var(--blue-dark)}
+.sel-item.selected{border-color:var(--blue);background:var(--blue-light)}
+.sel-item-icon{font-size:18px;margin-bottom:5px}
+.sel-item-name{font-size:12.5px;font-weight:600}
+.sel-item-desc{font-size:11px;color:var(--text2)}
+.sel-item-check{float:right;color:var(--blue);font-size:11px;font-weight:700}
+
+/* bar chart */
+.bar-chart{display:flex;align-items:flex-end;gap:5px;height:72px;padding-bottom:20px;position:relative}
+.bar-chart-inner{display:flex;align-items:flex-end;gap:5px;height:100%;flex:1}
+.bar{flex:1;border-radius:3px 3px 0 0;background:var(--blue);opacity:.7;transition:.3s;min-height:4px;position:relative}
+.bar:hover{opacity:1}
+.bar-lbl{position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--text3);white-space:nowrap;font-family:'JetBrains Mono',monospace}
+
+/* progress */
+.prog-wrap{background:var(--bg);border-radius:99px;height:5px;overflow:hidden;margin-top:6px}
+.prog-fill{height:100%;border-radius:99px;transition:width .4s ease}
+
+/* code */
+pre.code{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:12px;font-family:'JetBrains Mono',monospace;font-size:11px;overflow-x:auto;white-space:pre;color:#374151}
+
+/* toggle */
+.toggle{position:relative;display:inline-block;width:36px;height:20px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;cursor:pointer;inset:0;background:var(--border2);border-radius:20px;transition:.18s}
+.toggle-slider::before{content:'';position:absolute;width:14px;height:14px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.18s}
+input:checked+.toggle-slider{background:var(--blue)}
+input:checked+.toggle-slider::before{transform:translateX(16px)}
+
+/* tabs */
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:16px}
+.tab{padding:8px 14px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;transition:.12s;margin-bottom:-1px}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:600}
+
+/* search */
+.search-box{position:relative}
+.search-box .s-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text3)}
+.search-box input{padding-left:30px!important}
+
+/* running indicator */
+.running-pill{display:flex;align-items:center;gap:6px;background:var(--blue-light);border:1px solid rgba(37,99,235,.2);border-radius:20px;padding:3px 12px;font-size:12px;color:var(--blue);font-weight:500}
+.spin{width:10px;height:10px;border:2px solid rgba(37,99,235,.3);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+
+/* login */
+.login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg)}
+.login-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:36px;width:400px;box-shadow:var(--shadow-md);animation:fadeUp .3s ease}
+.login-logo{text-align:center;margin-bottom:24px}
+.login-logo-icon{width:48px;height:48px;background:var(--blue);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;margin:0 auto 10px}
+.login-title{font-size:20px;font-weight:700;text-align:center;margin-bottom:2px}
+.login-sub{text-align:center;color:var(--text2);font-size:13px;margin-bottom:24px}
+.error-box{background:var(--red-light);border:1px solid rgba(220,38,38,.2);border-radius:6px;padding:8px 12px;font-size:12.5px;color:var(--red);margin-bottom:14px}
+.demo-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.demo-chip{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:7px;cursor:pointer;text-align:center;transition:.12s;font-size:11.5px}
+.demo-chip:hover{border-color:var(--blue);color:var(--blue)}
+.demo-chip strong{display:block;font-size:12px;margin-bottom:1px}
+
+/* pipeline */
+.pipeline{display:flex;align-items:center;flex-wrap:wrap;gap:4px}
+.pipe-node{width:26px;height:26px;border-radius:50%;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:11px}
+.pipe-node.done{border-color:var(--green);background:var(--green-light);color:var(--green)}
+.pipe-line{width:20px;height:2px;background:var(--border);border-radius:2px}
+.pipe-line.done{background:var(--green)}
+
+/* empty state */
+.empty{text-align:center;padding:36px 16px;color:var(--text2)}
+.empty-icon{font-size:32px;margin-bottom:8px}
+.empty-title{font-weight:600;margin-bottom:4px}
+
+/* chip */
+.chip{display:inline-flex;align-items:center;background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:2px 9px;font-size:11px;color:var(--text2)}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect,useRef,useCallback}=React;
+
+/* ── CONFIG ── */
+const API='http://localhost:3001/api';
+const USE_BACKEND=false; // set true if backend is running
+
+/* ── SEED DATA (used when backend is off) ── */
+const SEED_USERS=[
+  {id:'1',name:'Alex Morgan', email:'admin@flowforge.io',   password:'admin123',   role:'Admin',   company:'TechCorp', tenant:'techcorp'},
+  {id:'2',name:'Jordan Lee',  email:'manager@flowforge.io', password:'manager123', role:'Manager', company:'TechCorp', tenant:'techcorp'},
+  {id:'3',name:'Sam Rivers',  email:'user@flowforge.io',    password:'user123',    role:'User',    company:'TechCorp', tenant:'techcorp'},
+];
+const SEED_WFS=[
+  {id:'wf1',name:'New Order → Email Confirm',tenant:'techcorp',status:'active', trigger:'new_order',       actions:['send_email','update_crm'],            condition:'always',      createdBy:'Alex Morgan',runs:142,successRate:97, retryEnabled:true, maxRetries:3,description:'Sends confirmation email and updates CRM on new order.'},
+  {id:'wf2',name:'Payment → Slack Notify',   tenant:'techcorp',status:'active', trigger:'payment_received',actions:['send_slack','create_invoice'],          condition:'amount_gt',   createdBy:'Jordan Lee', runs:88, successRate:100,retryEnabled:false,maxRetries:0,description:'Notifies team on Slack and generates invoice on payment.'},
+  {id:'wf3',name:'New Lead → CRM + Task',    tenant:'techcorp',status:'paused', trigger:'new_lead',        actions:['update_crm','create_task','send_email'],condition:'email_domain',createdBy:'Alex Morgan',runs:54, successRate:89, retryEnabled:true, maxRetries:2,description:'Adds lead to CRM, creates follow-up task, sends welcome email.'},
+  {id:'wf4',name:'Low Stock → Restock Alert',tenant:'techcorp',status:'active', trigger:'low_stock',       actions:['send_email','notify_team'],             condition:'always',      createdBy:'Sam Rivers', runs:12, successRate:100,retryEnabled:false,maxRetries:0,description:'Alerts team when inventory drops below threshold.'},
+  {id:'wf5',name:'Signup → Welcome Email',   tenant:'techcorp',status:'active', trigger:'user_signup',     actions:['send_email','add_tag'],                 condition:'always',      createdBy:'Jordan Lee', runs:203,successRate:99, retryEnabled:true, maxRetries:1,description:'Sends welcome email and tags new user in CRM.'},
+];
+const SEED_LOGS=[
+  {id:'l1',wf:'wf1',wfName:'New Order → Email Confirm', trigger:'new_order',       status:'success',msg:'Order #10421 processed. Email sent to john@example.com. CRM updated.',        duration:324,ts:Date.now()-3600000},
+  {id:'l2',wf:'wf2',wfName:'Payment → Slack Notify',    trigger:'payment_received',status:'success',msg:'Payment $249 received. Slack notification sent. Invoice INV-0092 created.',    duration:512,ts:Date.now()-7200000},
+  {id:'l3',wf:'wf5',wfName:'Signup → Welcome Email',    trigger:'user_signup',     status:'success',msg:'User alice@example.com signed up. Welcome email sent. Tagged as "new-user".',  duration:201,ts:Date.now()-10800000},
+  {id:'l4',wf:'wf3',wfName:'New Lead → CRM + Task',     trigger:'new_lead',        status:'error',  msg:'Failed to update CRM: Connection timeout. Retry scheduled.',                    duration:null,ts:Date.now()-14400000},
+  {id:'l5',wf:'wf4',wfName:'Low Stock → Restock Alert', trigger:'low_stock',       status:'success',msg:'SKU-884 below threshold (5 units). Alert sent to warehouse@company.com.',       duration:145,ts:Date.now()-18000000},
+];
+const SEED_INTG=[
+  {id:'shopify',      name:'Shopify',      icon:'🛍️',cat:'E-Commerce',  desc:'Sync orders, products & customers',connected:true, calls:1240},
+  {id:'stripe',       name:'Stripe',       icon:'💳',cat:'Payments',    desc:'Process payments & subscriptions', connected:true, calls:876},
+  {id:'mailchimp',    name:'Mailchimp',    icon:'📧',cat:'Email',       desc:'Email campaigns & automation',     connected:true, calls:430},
+  {id:'salesforce',   name:'Salesforce',   icon:'☁️',cat:'CRM',         desc:'CRM & sales pipeline',             connected:false,calls:0},
+  {id:'slack',        name:'Slack',        icon:'💬',cat:'Messaging',   desc:'Team communication & alerts',      connected:true, calls:612},
+  {id:'hubspot',      name:'HubSpot',      icon:'🔶',cat:'CRM',         desc:'Marketing, sales & service hub',   connected:false,calls:0},
+  {id:'twilio',       name:'Twilio',       icon:'📱',cat:'SMS',         desc:'SMS & voice communications',       connected:false,calls:0},
+  {id:'google_sheets',name:'Google Sheets',icon:'📊',cat:'Productivity',desc:'Spreadsheet data sync',            connected:true, calls:221},
+  {id:'jira',         name:'Jira',         icon:'🎫',cat:'Project Mgmt',desc:'Issue tracking & agile boards',    connected:false,calls:0},
+  {id:'zendesk',      name:'Zendesk',      icon:'🎧',cat:'Support',     desc:'Customer support platform',        connected:false,calls:0},
+];
+const TRIGGERS=[
+  {id:'new_order',       label:'New Order',        icon:'🛒'},
+  {id:'payment_received',label:'Payment Received',  icon:'💳'},
+  {id:'new_lead',        label:'New Lead',          icon:'👤'},
+  {id:'form_submitted',  label:'Form Submitted',    icon:'📝'},
+  {id:'low_stock',       label:'Low Stock Alert',   icon:'📦'},
+  {id:'user_signup',     label:'User Signup',       icon:'🎉'},
+  {id:'ticket_created',  label:'Support Ticket',    icon:'🎫'},
+  {id:'schedule',        label:'Scheduled',         icon:'⏰'},
+];
+const ACTIONS=[
+  {id:'send_email',    label:'Send Email',        icon:'📧',desc:'Send email notification'},
+  {id:'send_sms',      label:'Send SMS',          icon:'📱',desc:'Send SMS message'},
+  {id:'update_crm',    label:'Update CRM',        icon:'🗃️',desc:'Update CRM record'},
+  {id:'create_task',   label:'Create Task',       icon:'✅',desc:'Create project task'},
+  {id:'send_slack',    label:'Send Slack Message',icon:'💬',desc:'Post to Slack channel'},
+  {id:'update_sheet',  label:'Update Spreadsheet',icon:'📊',desc:'Write data to sheet'},
+  {id:'webhook',       label:'Call Webhook',      icon:'🔗',desc:'HTTP POST to URL'},
+  {id:'add_tag',       label:'Add Tag',           icon:'🏷️',desc:'Tag contact in CRM'},
+  {id:'create_invoice',label:'Create Invoice',    icon:'🧾',desc:'Generate invoice'},
+  {id:'notify_team',   label:'Notify Team',       icon:'🔔',desc:'Internal team alert'},
+];
+const CONDITIONS=[
+  {id:'always',      label:'Always (No Condition)'},
+  {id:'amount_gt',   label:'Amount > $100'},
+  {id:'amount_gt500',label:'Amount > $500'},
+  {id:'country_us',  label:'Country = US'},
+  {id:'email_domain',label:'Email contains @company.com'},
+  {id:'status_pending',label:'Status = Pending'},
+];
+
+const uid=()=>Math.random().toString(36).slice(2,10);
+const fmtTs=(ts)=>new Date(ts).toLocaleString('en',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+const sleep=(ms)=>new Promise(r=>setTimeout(r,ms));
+
+/* ── TOAST ── */
+let _setToasts=null;
+const toast=(msg,type='info',dur=3200)=>{
+  if(!_setToasts)return;
+  const id=uid();
+  _setToasts(p=>[...p,{id,msg,type}]);
+  setTimeout(()=>_setToasts(p=>p.filter(t=>t.id!==id)),dur);
+};
+const T_ICONS={success:'✅',error:'❌',info:'ℹ️',warn:'⚠️'};
+
+function Toasts(){
+  const [toasts,setToasts]=useState([]);
+  useEffect(()=>{_setToasts=setToasts;},[]);
+  return(
+    <div className="toast-wrap">
+      {toasts.map(t=>(
+        <div key={t.id} className={`toast ${t.type}`}>
+          <span>{T_ICONS[t.type]}</span>
+          <span>{t.msg}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ── WORKFLOW ENGINE (client-side simulation) ── */
+async function runWorkflow(wf,eventData,addLog,setRunning){
+  setRunning(wf.id);
+  const t0=Date.now();
+  let attempt=0;
+  const maxAttempts=wf.retryEnabled?wf.maxRetries+1:1;
+  while(attempt<maxAttempts){
+    try{
+      await sleep(300+Math.random()*500);
+      if(Math.random()<0.07&&attempt<maxAttempts-1)throw new Error('API timeout');
+      const dur=Date.now()-t0;
+      const actionStr=wf.actions.map(a=>ACTIONS.find(x=>x.id===a)?.label||a).join(', ');
+      addLog({id:uid(),wf:wf.id,wfName:wf.name,trigger:wf.trigger,status:'success',
+        msg:`[${eventData.label}] ${actionStr} — ${eventData.detail}`,duration:dur,ts:Date.now()});
+      toast(`✅ ${wf.name} executed`,'success');
+      setRunning(null);return true;
+    }catch(err){
+      attempt++;
+      if(attempt<maxAttempts){toast(`⚠️ ${wf.name}: retrying (${attempt})…`,'warn');await sleep(600);}
+      else{
+        addLog({id:uid(),wf:wf.id,wfName:wf.name,trigger:wf.trigger,status:'error',
+          msg:`Failed after ${attempt} attempt(s): ${err.message}`,duration:null,ts:Date.now()});
+        toast(`❌ ${wf.name} failed`,'error');
+      }
+    }
+  }
+  setRunning(null);return false;
+}
+
+/* ── APP ── */
+function App(){
+  const [user,setUser]=useState(null);
+  const [page,setPage]=useState('dashboard');
+  const [isNavCollapsed,setIsNavCollapsed]=useState(false);
+  const [workflows,setWorkflows]=useState(SEED_WFS);
+  const [logs,setLogs]=useState(SEED_LOGS);
+  const [integrations,setIntegrations]=useState(SEED_INTG);
+  const [running,setRunning]=useState(null);
+  const [token,setToken]=useState(null);
+
+  const addLog=useCallback(l=>setLogs(p=>[l,...p].slice(0,300)),[]);
+
+  const login=async(email,password)=>{
+    if(USE_BACKEND){
+      const r=await fetch(`${API}/auth/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})});
+      const d=await r.json();
+      if(!r.ok)throw new Error(d.error);
+      setToken(d.token);setUser(d.user);
+    }else{
+      const u=SEED_USERS.find(x=>x.email===email&&x.password===password);
+      if(!u)throw new Error('Invalid email or password.');
+      setUser(u);
+    }
+    toast('Welcome back!','success');
+  };
+
+  const logout=()=>{setUser(null);setToken(null);setPage('dashboard');toast('Logged out','info');};
+
+  const simulateEvent=(trigger,label,detail)=>{
+    const matching=workflows.filter(w=>w.trigger===trigger&&w.status==='active'&&w.tenant===user.tenant);
+    if(!matching.length){toast(`No active workflows for: ${label}`,'warn');return;}
+    matching.forEach(wf=>{
+      runWorkflow(wf,{label,detail},addLog,setRunning);
+      setWorkflows(p=>p.map(w=>w.id===wf.id?{...w,runs:w.runs+1,lastRun:Date.now()}:w));
+    });
+    toast(`🚀 ${label} fired — ${matching.length} workflow(s) running`,'info');
+  };
+
+  if(!user)return<><LoginPage onLogin={login}/><Toasts/></>;
+
+  const navLinks=[
+    {id:'dashboard',icon:'📊',label:'Dashboard'},
+    {id:'workflows',icon:'⚡',label:'Workflows'},
+    {id:'builder',  icon:'🔨',label:'Workflow Builder'},
+    {id:'events',   icon:'🚀',label:'Event Simulator'},
+    {id:'integrations',icon:'🔌',label:'Integrations'},
+    {id:'logs',     icon:'📋',label:'Logs & Monitoring'},
+    {id:'analytics',icon:'📈',label:'Analytics'},
+    ...(user.role==='Admin'?[{id:'tenants',icon:'🏢',label:'Tenants'}]:[]),
+    {id:'settings', icon:'⚙️',label:'Settings'},
+  ];
+
+  const PAGES={
+    dashboard:  <Dashboard user={user} workflows={workflows} logs={logs} simulateEvent={simulateEvent} running={running}/>,
+    workflows:  <WorkflowsPage user={user} workflows={workflows} setWorkflows={setWorkflows} logs={logs} running={running} simulateEvent={simulateEvent}/>,
+    builder:    <Builder user={user} workflows={workflows} setWorkflows={setWorkflows} setPage={setPage}/>,
+    events:     <EventSim user={user} workflows={workflows} simulateEvent={simulateEvent} running={running}/>,
+    integrations:<IntegPage integrations={integrations} setIntegrations={setIntegrations}/>,
+    logs:       <LogsPage logs={logs} setLogs={setLogs} user={user} workflows={workflows}/>,
+    analytics:  <AnalyticsPage workflows={workflows} logs={logs}/>,
+    tenants:    <TenantsPage/>,
+    settings:   <SettingsPage user={user}/>,
+  };
+
+  return(
+    <div className={`shell ${isNavCollapsed?'nav-collapsed':''}`}>
+      {/* SIDEBAR */}
+      <aside className="sidebar">
+        <div className="logo-wrap">
+          <div className="logo-icon">⚡</div>
+          <div className="logo-text"><em>Flow</em>Forge</div>
+        </div>
+        <div className="workspace-card-wrap" style={{padding:'8px 12px',borderBottom:'1px solid var(--border)'}}>
+          <div style={{background:'var(--bg)',border:'1px solid var(--border)',borderRadius:6,padding:'7px 10px'}}>
+            <div style={{fontSize:10,color:'var(--text3)',fontWeight:600,letterSpacing:.5}}>WORKSPACE</div>
+            <div style={{fontWeight:600,fontSize:13,marginTop:1}}>{user.company}</div>
+            <div style={{fontSize:11,color:'var(--blue)',fontFamily:'JetBrains Mono'}}>{user.role}</div>
+          </div>
+        </div>
+        <nav className="nav-group">
+          <div className="nav-section-title">Navigation</div>
+          {navLinks.map(n=>(
+            <div key={n.id} className={`nav-link ${page===n.id?'active':''}`} onClick={()=>setPage(n.id)} title={n.label}>
+              <span className="ni">{n.icon}</span><span>{n.label}</span>
+            </div>
+          ))}
+        </nav>
+        <div className="sidebar-footer">
+          <div style={{fontSize:11,color:'var(--text3)',marginBottom:4}}>v2.4 · Event-Driven</div>
+          <div style={{fontSize:12}}><span className="online-dot"/>Engine running</div>
+        </div>
+      </aside>
+
+      {/* MAIN */}
+      <div className="main">
+        <header className="topbar">
+          <button
+            className="btn btn-default btn-sm nav-toggle"
+            onClick={()=>setIsNavCollapsed(v=>!v)}
+            title={isNavCollapsed?'Expand navigation':'Minimize navigation'}
+          >
+            {isNavCollapsed?'➡️':'⬅️'}
+          </button>
+          <span className="topbar-title">{navLinks.find(n=>n.id===page)?.label||'FlowForge'}</span>
+          {running&&(
+            <div className="running-pill">
+              <div className="spin"/>
+              Running workflow…
+            </div>
+          )}
+          <div className="topbar-right">
+            <div className="user-pill">
+              <div className="avatar">{user.name.split(' ').map(x=>x[0]).join('')}</div>
+              <div className="user-info">
+                <div className="user-name">{user.name}</div>
+                <div className="user-role">{user.role}</div>
+              </div>
+            </div>
+            <button className="btn btn-default btn-sm" onClick={logout}>Logout</button>
+          </div>
+        </header>
+        <main className="page">{PAGES[page]||<div>Page not found</div>}</main>
+      </div>
+      <Toasts/>
+    </div>
+  );
+}
+
+/* ── LOGIN ── */
+function LoginPage({onLogin}){
+  const [email,setEmail]=useState('');
+  const [pass,setPass]=useState('');
+  const [err,setErr]=useState('');
+  const [loading,setLoading]=useState(false);
+
+  const submit=async(e)=>{
+    e.preventDefault();setErr('');setLoading(true);
+    await sleep(500);
+    try{await onLogin(email,pass);}catch(e){setErr(e.message);}
+    setLoading(false);
+  };
+  const quick=(u)=>{setEmail(u.email);setPass(u.password);};
+
+  return(
+    <div className="login-page">
+      <div className="login-card">
+        <div className="login-logo">
+          <div className="login-logo-icon">⚡</div>
+          <div className="login-title">FlowForge</div>
+          <div style={{fontSize:11,color:'var(--text3)',fontFamily:'JetBrains Mono',letterSpacing:.5}}>ENTERPRISE AUTOMATION PLATFORM</div>
+        </div>
+        <p className="login-sub">Sign in to your workspace</p>
+        {err&&<div className="error-box">{err}</div>}
+        <form onSubmit={submit}>
+          <div className="form-group">
+            <label className="form-label">Email Address</label>
+            <input className="form-input" type="email" placeholder="you@company.com" value={email} onChange={e=>setEmail(e.target.value)} required/>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Password</label>
+            <input className="form-input" type="password" placeholder="••••••••" value={pass} onChange={e=>setPass(e.target.value)} required/>
+          </div>
+          <button className="btn btn-primary w-full btn-lg" type="submit" disabled={loading} style={{justifyContent:'center',marginTop:4}}>
+            {loading?'Signing in…':'Sign In'}
+          </button>
+        </form>
+        <hr className="divider"/>
+        <div className="text-xs text-muted mb-2" style={{textAlign:'center'}}>Demo Accounts (click to fill)</div>
+        <div className="demo-grid">
+          {SEED_USERS.map(u=>(
+            <div key={u.id} className="demo-chip" onClick={()=>quick(u)}>
+              <strong>{u.role}</strong>{u.name.split(' ')[0]}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── DASHBOARD ── */
+function Dashboard({user,workflows,logs,simulateEvent,running}){
+  const myWf=workflows.filter(w=>w.tenant===user.tenant);
+  const active=myWf.filter(w=>w.status==='active').length;
+  const totalRuns=myWf.reduce((s,w)=>s+w.runs,0);
+  const succLogs=logs.filter(l=>l.status==='success').length;
+  const rate=logs.length?Math.round(succLogs/logs.length*100):0;
+  const recent=logs.slice(0,5);
+  const qEvents=[
+    {trigger:'new_order',       label:'New Order',       icon:'🛒',detail:'Order #'+Math.floor(Math.random()*90000+10000)},
+    {trigger:'payment_received',label:'Payment Received',icon:'💳',detail:'$'+Math.floor(Math.random()*400+50)+'.00'},
+    {trigger:'new_lead',        label:'New Lead',        icon:'👤',detail:'From contact form'},
+    {trigger:'user_signup',     label:'User Signup',     icon:'🎉',detail:'New registration'},
+  ];
+  return(
+    <div>
+      <div className="page-title">Dashboard</div>
+      <p className="page-sub">Welcome back, {user.name.split(' ')[0]}. Here's an overview of your automation platform.</p>
+
+      <div className="stats-grid">
+        <div className="stat-card"><div className="stat-val text-blue">{active}</div><div className="stat-lbl">Active Workflows</div><div className="stat-change stat-up">↑ 2 this week</div></div>
+        <div className="stat-card"><div className="stat-val text-green">{totalRuns.toLocaleString()}</div><div className="stat-lbl">Total Executions</div><div className="stat-change stat-up">↑ 12% vs last week</div></div>
+        <div className="stat-card"><div className="stat-val" style={{color:'var(--amber)'}}>{rate}%</div><div className="stat-lbl">Success Rate</div><div className="stat-change stat-up">↑ 0.8% improvement</div></div>
+        <div className="stat-card"><div className="stat-val" style={{color:'var(--purple)'}}>{SEED_INTG.filter(i=>i.connected).length}</div><div className="stat-lbl">Connected Apps</div><div className="stat-change text-muted">Active integrations</div></div>
+      </div>
+
+      <div className="grid-2 mb-4">
+        <div className="card">
+          <div className="card-title">Quick Fire Events</div>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+            {qEvents.map(e=>(
+              <button key={e.trigger} className="evt-btn" onClick={()=>simulateEvent(e.trigger,e.label,e.detail)} disabled={!!running}>
+                <div className="evt-icon">{e.icon}</div>
+                <div className="evt-name">{e.label}</div>
+                <div className="evt-desc">Click to fire</div>
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="card">
+          <div className="card-title">Workflow Status</div>
+          {myWf.slice(0,5).map(wf=>(
+            <div key={wf.id} className="flex items-center gap-3" style={{padding:'7px 0',borderBottom:'1px solid var(--border)'}}>
+              <div style={{width:7,height:7,borderRadius:'50%',background:wf.status==='active'?'var(--green)':'var(--border2)',flexShrink:0}}/>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontSize:13,fontWeight:500}} className="truncate">{wf.name}</div>
+                <div style={{fontSize:11,color:'var(--text2)'}}>{wf.runs} runs · {wf.successRate}% success</div>
+              </div>
+              <span className={`badge ${wf.status==='active'?'badge-success':'badge-idle'}`}>{wf.status}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="card">
+        <div className="card-title">Recent Activity</div>
+        {recent.length===0&&<div className="empty"><div className="empty-icon">📭</div><div>No activity yet. Fire an event to get started.</div></div>}
+        {recent.map(l=>(
+          <div key={l.id} className="log-row">
+            <div className={`log-icon ${l.status}`}>{l.status==='success'?'✓':'✗'}</div>
+            <div style={{flex:1,minWidth:0}}>
+              <div style={{fontSize:13,fontWeight:500}} className="truncate">{l.wfName}</div>
+              <div style={{fontSize:12,color:'var(--text2)'}} className="truncate">{l.msg}</div>
+              <div style={{fontSize:11,color:'var(--text3)',fontFamily:'JetBrains Mono',marginTop:2}}>{fmtTs(l.ts)}{l.duration?` · ${l.duration}ms`:''}</div>
+            </div>
+            <span className={`badge ${l.status==='success'?'badge-success':'badge-error'}`}>{l.status}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ── WORKFLOWS ── */
+function WorkflowsPage({user,workflows,setWorkflows,logs,running,simulateEvent}){
+  const [search,setSearch]=useState('');
+  const [filter,setFilter]=useState('all');
+  const [selected,setSelected]=useState(null);
+
+  const myWf=workflows.filter(w=>w.tenant===user.tenant).filter(w=>{
+    if(filter!=='all'&&w.status!==filter)return false;
+    if(search&&!w.name.toLowerCase().includes(search.toLowerCase()))return false;
+    return true;
+  });
+
+  const toggle=(wf)=>{
+    setWorkflows(p=>p.map(w=>w.id===wf.id?{...w,status:w.status==='active'?'paused':'active'}:w));
+    toast(`Workflow ${wf.status==='active'?'paused':'activated'}`,'info');
+  };
+  const del=(wf)=>{
+    if(!window.confirm(`Delete "${wf.name}"?`))return;
+    setWorkflows(p=>p.filter(w=>w.id!==wf.id));
+    setSelected(null);toast(`Deleted: ${wf.name}`,'warn');
+  };
+
+  return(
+    <div>
+      <div className="page-title">Workflows</div>
+      <p className="page-sub">Manage your automated workflows</p>
+      <div className="flex gap-2 mb-4 items-center">
+        <div className="search-box flex-1" style={{maxWidth:280}}>
+          <span className="s-icon">🔍</span>
+          <input className="form-input" placeholder="Search workflows…" value={search} onChange={e=>setSearch(e.target.value)} style={{paddingLeft:30}}/>
+        </div>
+        <div className="tabs" style={{marginBottom:0,borderBottom:'none'}}>
+          {['all','active','paused'].map(f=>(
+            <div key={f} className={`tab ${filter===f?'active':''}`} style={{borderRadius:6,padding:'6px 12px',border:'1px solid var(--border)',marginRight:4,background:filter===f?'var(--blue-light)':'var(--white)',color:filter===f?'var(--blue)':'var(--text2)',fontSize:12.5,fontWeight:500}} onClick={()=>setFilter(f)}>
+              {f.charAt(0).toUpperCase()+f.slice(1)}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {myWf.length===0&&<div className="empty card"><div className="empty-icon">⚡</div><div className="empty-title">No workflows found</div><div>Create one using the Workflow Builder</div></div>}
+
+      {myWf.map(wf=>{
+        const tri=TRIGGERS.find(t=>t.id===wf.trigger);
+        const wfLogs=logs.filter(l=>l.wf===wf.id).slice(0,3);
+        const isSel=selected===wf.id;
+        return(
+          <div key={wf.id} className={`wf-card ${isSel?'selected':''}`}>
+            <div className="flex items-center gap-3" onClick={()=>setSelected(isSel?null:wf.id)}>
+              <span style={{fontSize:20}}>{tri?.icon||'⚡'}</span>
+              <div style={{flex:1,minWidth:0}}>
+                <div className="flex items-center gap-2 mb-1">
+                  <span style={{fontWeight:600,fontSize:13.5}}>{wf.name}</span>
+                  <span className={`badge ${wf.status==='active'?'badge-success':'badge-idle'}`}>{wf.status}</span>
+                  {running===wf.id&&<span className="badge badge-info">running…</span>}
+                </div>
+                <div style={{fontSize:11.5,color:'var(--text2)'}}>
+                  {tri?.label} → {wf.actions.map(a=>ACTIONS.find(x=>x.id===a)?.label).join(', ')} · {wf.runs} runs · {wf.successRate}% success
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <button className="btn btn-default btn-sm" disabled={!!running||wf.status!=='active'} onClick={e=>{e.stopPropagation();simulateEvent(wf.trigger,TRIGGERS.find(t=>t.id===wf.trigger)?.label||wf.trigger,'Manual test');}}>▶ Run</button>
+                <button className="btn btn-default btn-sm" onClick={e=>{e.stopPropagation();toggle(wf);}}>{wf.status==='active'?'Pause':'Resume'}</button>
+                <button className="btn btn-danger btn-sm" onClick={e=>{e.stopPropagation();del(wf);}}>Delete</button>
+              </div>
+            </div>
+            {isSel&&(
+              <div className="wf-expand">
+                <div className="grid-2">
+                  <div>
+                    <div style={{fontSize:11,fontWeight:600,color:'var(--text2)',marginBottom:8}}>PIPELINE</div>
+                    <div className="pipeline">
+                      <div className="pipe-node done">{tri?.icon}</div>
+                      <div className="pipe-line done"/>
+                      {wf.actions.map((a,i)=>{
+                        const act=ACTIONS.find(x=>x.id===a);
+                        return<React.Fragment key={a}>
+                          <div className="pipe-node done" title={act?.label}>{act?.icon}</div>
+                          {i<wf.actions.length-1&&<div className="pipe-line done"/>}
+                        </React.Fragment>;
+                      })}
+                    </div>
+                    <div style={{fontSize:12,color:'var(--text2)',marginTop:10}}>{wf.description}</div>
+                    <div className="flex gap-2 mt-3">
+                      <span className="chip">Retry: {wf.retryEnabled?`${wf.maxRetries}x`:'Off'}</span>
+                      <span className="chip">By: {wf.createdBy}</span>
+                    </div>
+                  </div>
+                  <div>
+                    <div style={{fontSize:11,fontWeight:600,color:'var(--text2)',marginBottom:8}}>RECENT LOGS</div>
+                    {wfLogs.length===0&&<div style={{fontSize:12,color:'var(--text3)'}}>No executions yet</div>}
+                    {wfLogs.map(l=>(
+                      <div key={l.id} className="flex gap-2 items-center mb-2">
+                        <span className={`badge ${l.status==='success'?'badge-success':'badge-error'}`}>{l.status}</span>
+                        <span style={{fontSize:11,color:'var(--text2)'}} className="truncate">{l.msg}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ── BUILDER ── */
+function Builder({user,workflows,setWorkflows,setPage}){
+  const [step,setStep]=useState(1);
+  const [wf,setWf]=useState({name:'',description:'',trigger:'',condition:'always',actions:[],retryEnabled:false,maxRetries:2});
+  const [done,setDone]=useState(false);
+
+  const addAct=(a)=>{if(!wf.actions.includes(a)&&wf.actions.length<6)setWf(p=>({...p,actions:[...p.actions,a]}));};
+  const remAct=(a)=>setWf(p=>({...p,actions:p.actions.filter(x=>x!==a)}));
+  const ok1=wf.name&&wf.trigger;
+  const ok2=wf.actions.length>0;
+
+  const save=()=>{
+    if(!ok1||!ok2){toast('Fill all required fields','error');return;}
+    const n={...wf,id:'wf_'+uid(),status:'active',tenant:user.tenant,createdBy:user.name,runs:0,successRate:100,lastRun:null,createdAt:Date.now()};
+    setWorkflows(p=>[...p,n]);
+    setDone(true);
+    toast(`Workflow "${wf.name}" created!`,'success');
+  };
+
+  if(done)return(
+    <div style={{textAlign:'center',padding:'60px 20px',animation:'fadeUp .3s ease'}}>
+      <div style={{fontSize:48,marginBottom:14}}>🎉</div>
+      <div className="page-title mb-2">Workflow Created!</div>
+      <div style={{color:'var(--text2)',marginBottom:24}}>"{wf.name}" is now active.</div>
+      <div className="flex gap-2" style={{justifyContent:'center'}}>
+        <button className="btn btn-primary" onClick={()=>{setDone(false);setWf({name:'',description:'',trigger:'',condition:'always',actions:[],retryEnabled:false,maxRetries:2});setStep(1);}}>Create Another</button>
+        <button className="btn btn-default" onClick={()=>setPage('workflows')}>View Workflows →</button>
+      </div>
+    </div>
+  );
+
+  const stepLabels=['Trigger & Name','Add Actions','Configure'];
+  return(
+    <div>
+      <div className="page-title">Workflow Builder</div>
+      <p className="page-sub">Build automation workflows step by step</p>
+
+      <div className="steps">
+        {stepLabels.map((l,i)=>{
+          const s=i+1;
+          const cls=step>s?'done':step===s?'current':'';
+          return(
+            <React.Fragment key={s}>
+              <div className="step-item" onClick={()=>{if(s<step||(s===2&&ok1)||(s===3&&ok1&&ok2))setStep(s);}}>
+                <div className={`step-circle ${cls}`}>{step>s?'✓':s}</div>
+                <div className={`step-label ${step===s?'current':''}`}>{l}</div>
+              </div>
+              {s<3&&<div className={`step-line ${step>s?'done':''}`}/>}
+            </React.Fragment>
+          );
+        })}
+      </div>
+
+      <div className="card">
+        {step===1&&(
+          <div style={{animation:'fadeUp .2s ease'}}>
+            <div style={{fontWeight:600,marginBottom:14}}>Step 1: Define Trigger & Name</div>
+            <div className="grid-2">
+              <div className="form-group">
+                <label className="form-label">Workflow Name *</label>
+                <input className="form-input" placeholder="e.g. New Order → Send Email" value={wf.name} onChange={e=>setWf(p=>({...p,name:e.target.value}))}/>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Run Condition</label>
+                <select className="form-select" value={wf.condition} onChange={e=>setWf(p=>({...p,condition:e.target.value}))}>
+                  {CONDITIONS.map(c=><option key={c.id} value={c.id}>{c.label}</option>)}
+                </select>
+              </div>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Description</label>
+              <input className="form-input" placeholder="What does this workflow do?" value={wf.description} onChange={e=>setWf(p=>({...p,description:e.target.value}))}/>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Select Trigger *</label>
+              <div className="sel-grid">
+                {TRIGGERS.map(t=>(
+                  <div key={t.id} className={`sel-item ${wf.trigger===t.id?'selected':''}`} onClick={()=>setWf(p=>({...p,trigger:t.id}))}>
+                    <div className="sel-item-icon">{t.icon}</div>
+                    <div className="sel-item-name">{t.label}</div>
+                    {wf.trigger===t.id&&<span className="sel-item-check">✓</span>}
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="flex" style={{justifyContent:'flex-end'}}>
+              <button className="btn btn-primary" onClick={()=>setStep(2)} disabled={!ok1}>Next: Add Actions →</button>
+            </div>
+          </div>
+        )}
+
+        {step===2&&(
+          <div style={{animation:'fadeUp .2s ease'}}>
+            <div style={{fontWeight:600,marginBottom:4}}>Step 2: Add Actions</div>
+            <div style={{fontSize:12.5,color:'var(--text2)',marginBottom:14}}>Select up to 6 actions. They execute in order.</div>
+
+            {wf.actions.length>0&&(
+              <div className="mb-4">
+                <div className="form-label">Selected ({wf.actions.length})</div>
+                {wf.actions.map((a,i)=>{
+                  const act=ACTIONS.find(x=>x.id===a);
+                  return(
+                    <div key={a} className="flex items-center gap-2" style={{background:'var(--bg)',border:'1px solid var(--border)',borderRadius:6,padding:'7px 10px',marginBottom:5}}>
+                      <span style={{fontSize:15}}>{act?.icon}</span>
+                      <span style={{flex:1,fontSize:13,fontWeight:500}}>{act?.label}</span>
+                      <span style={{fontSize:10,color:'var(--text3)',fontFamily:'JetBrains Mono'}}>#{i+1}</span>
+                      <button className="btn btn-danger btn-sm" onClick={()=>remAct(a)}>✕</button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            <div className="form-label">Available Actions</div>
+            <div className="sel-grid">
+              {ACTIONS.map(a=>{
+                const sel=wf.actions.includes(a.id);
+                return(
+                  <div key={a.id} className={`sel-item ${sel?'selected':''}`} onClick={()=>sel?remAct(a.id):addAct(a.id)} style={{opacity:!sel&&wf.actions.length>=6?.4:1}}>
+                    <div className="sel-item-icon">{a.icon}</div>
+                    <div className="sel-item-name">{a.label}</div>
+                    <div className="sel-item-desc">{a.desc}</div>
+                    {sel&&<span className="sel-item-check">✓ Added</span>}
+                  </div>
+                );
+              })}
+            </div>
+            <div className="flex gap-2 mt-4" style={{justifyContent:'space-between'}}>
+              <button className="btn btn-default" onClick={()=>setStep(1)}>← Back</button>
+              <button className="btn btn-primary" onClick={()=>setStep(3)} disabled={!ok2}>Next: Configure →</button>
+            </div>
+          </div>
+        )}
+
+        {step===3&&(
+          <div style={{animation:'fadeUp .2s ease'}}>
+            <div style={{fontWeight:600,marginBottom:14}}>Step 3: Configure & Save</div>
+            <div className="grid-2">
+              <div>
+                <div className="form-label" style={{marginBottom:10}}>Error Handling & Retry</div>
+                <div className="flex items-center gap-3 mb-3">
+                  <label className="toggle"><input type="checkbox" checked={wf.retryEnabled} onChange={e=>setWf(p=>({...p,retryEnabled:e.target.checked}))}/><span className="toggle-slider"/></label>
+                  <span style={{fontSize:13}}>Enable Auto-Retry on Failure</span>
+                </div>
+                {wf.retryEnabled&&(
+                  <div className="form-group">
+                    <label className="form-label">Max Retries</label>
+                    <select className="form-select" value={wf.maxRetries} onChange={e=>setWf(p=>({...p,maxRetries:+e.target.value}))}>
+                      {[1,2,3,5].map(n=><option key={n} value={n}>{n} retries</option>)}
+                    </select>
+                  </div>
+                )}
+              </div>
+              <div>
+                <div className="form-label" style={{marginBottom:10}}>Summary</div>
+                <div style={{background:'var(--bg)',border:'1px solid var(--border)',borderRadius:6,padding:12,fontSize:12.5}}>
+                  <div className="mb-2"><b>Trigger:</b> {TRIGGERS.find(t=>t.id===wf.trigger)?.label}</div>
+                  <div className="mb-2"><b>Condition:</b> {CONDITIONS.find(c=>c.id===wf.condition)?.label}</div>
+                  <div className="mb-2"><b>Actions ({wf.actions.length}):</b></div>
+                  {wf.actions.map((a,i)=><div key={a} style={{paddingLeft:10,color:'var(--text2)',fontSize:12}}>{i+1}. {ACTIONS.find(x=>x.id===a)?.label}</div>)}
+                  <div className="mt-2"><b>Retry:</b> {wf.retryEnabled?`${wf.maxRetries}x`:'Disabled'}</div>
+                </div>
+              </div>
+            </div>
+            <div className="mb-4">
+              <div className="form-label mt-3">Workflow JSON</div>
+              <pre className="code">{JSON.stringify({name:wf.name,trigger:wf.trigger,condition:wf.condition,actions:wf.actions,retry:{enabled:wf.retryEnabled,max:wf.maxRetries}},null,2)}</pre>
+            </div>
+            <div className="flex gap-2" style={{justifyContent:'space-between'}}>
+              <button className="btn btn-default" onClick={()=>setStep(2)}>← Back</button>
+              <button className="btn btn-primary btn-lg" onClick={save}>🚀 Create Workflow</button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ── EVENT SIMULATOR ── */
+function EventSim({user,workflows,simulateEvent,running}){
+  const [custom,setCustom]=useState({trigger:'new_order',payload:'{"orderId":"#12345","amount":299}'});
+  const [evtHistory,setHistory]=useState([]);
+  const activeWf=workflows.filter(w=>w.tenant===user.tenant&&w.status==='active');
+
+  const fire=(trigger,label,detail)=>{
+    simulateEvent(trigger,label,detail);
+    setHistory(p=>[{id:uid(),trigger,label,ts:Date.now()},...p].slice(0,20));
+  };
+  const fireCustom=()=>{
+    try{JSON.parse(custom.payload);}catch{toast('Invalid JSON payload','error');return;}
+    const tri=TRIGGERS.find(t=>t.id===custom.trigger);
+    fire(custom.trigger,tri?.label||custom.trigger,`Custom: ${custom.payload.slice(0,60)}`);
+  };
+
+  return(
+    <div>
+      <div className="page-title">Event Simulator</div>
+      <p className="page-sub">Simulate trigger events to test your workflows</p>
+
+      <div className="grid-2 mb-4">
+        <div className="card">
+          <div className="card-title">Standard Events</div>
+          <div className="evt-grid">
+            {TRIGGERS.map(t=>{
+              const cnt=activeWf.filter(w=>w.trigger===t.id).length;
+              return(
+                <button key={t.id} className="evt-btn" disabled={!!running} onClick={()=>fire(t.id,t.label,`Simulated ${t.label}`)}>
+                  <div className="evt-icon">{t.icon}</div>
+                  <div className="evt-name">{t.label}</div>
+                  <div className="evt-desc">{cnt} workflow{cnt!==1?'s':''} will run</div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+        <div>
+          <div className="card mb-4">
+            <div className="card-title">Custom Payload</div>
+            <div className="form-group">
+              <label className="form-label">Trigger Type</label>
+              <select className="form-select" value={custom.trigger} onChange={e=>setCustom(p=>({...p,trigger:e.target.value}))}>
+                {TRIGGERS.map(t=><option key={t.id} value={t.id}>{t.label}</option>)}
+              </select>
+            </div>
+            <div className="form-group">
+              <label className="form-label">JSON Payload</label>
+              <textarea className="form-textarea" style={{fontFamily:'JetBrains Mono',fontSize:11.5}} value={custom.payload} onChange={e=>setCustom(p=>({...p,payload:e.target.value}))}/>
+            </div>
+            <button className="btn btn-primary w-full" style={{justifyContent:'center'}} disabled={!!running} onClick={fireCustom}>🚀 Fire Custom Event</button>
+          </div>
+          <div className="card">
+            <div className="card-title">Active Workflows ({activeWf.length})</div>
+            {activeWf.length===0&&<div style={{fontSize:12,color:'var(--text3)'}}>No active workflows</div>}
+            {activeWf.map(wf=>(
+              <div key={wf.id} className="flex items-center gap-2" style={{padding:'6px 0',borderBottom:'1px solid var(--border)'}}>
+                <span>{TRIGGERS.find(t=>t.id===wf.trigger)?.icon||'⚡'}</span>
+                <span style={{fontSize:12.5,flex:1}} className="truncate">{wf.name}</span>
+                <span className="badge badge-success">active</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {evtHistory.length>0&&(
+        <div className="card">
+          <div className="card-title">Event History (session)</div>
+          <div className="table-wrap">
+            <table>
+              <thead><tr><th>#</th><th>Event</th><th>Trigger ID</th><th>Time</th></tr></thead>
+              <tbody>
+                {evtHistory.map((h,i)=>(
+                  <tr key={h.id}>
+                    <td><span className="font-mono text-muted">{evtHistory.length-i}</span></td>
+                    <td style={{fontWeight:500}}>{h.label}</td>
+                    <td><span className="chip font-mono" style={{fontSize:10}}>{h.trigger}</span></td>
+                    <td><span className="text-muted text-xs font-mono">{fmtTs(h.ts)}</span></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── INTEGRATIONS ── */
+function IntegPage({integrations,setIntegrations}){
+  const [cat,setCat]=useState('All');
+  const cats=['All',...[...new Set(integrations.map(i=>i.cat))]];
+  const toggle=(id)=>{
+    const intg=integrations.find(i=>i.id===id);
+    setIntegrations(p=>p.map(i=>i.id===id?{...i,connected:!i.connected}:i));
+    toast(intg.connected?`Disconnected ${intg.name}`:`Connected ${intg.name}`,'info');
+  };
+  const filtered=cat==='All'?integrations:integrations.filter(i=>i.cat===cat);
+  const connCount=integrations.filter(i=>i.connected).length;
+
+  return(
+    <div>
+      <div className="page-title">Integrations</div>
+      <p className="page-sub">Connect tools and services to FlowForge — {connCount}/{integrations.length} connected</p>
+      <div className="flex gap-2 mb-4 flex-wrap">
+        {cats.map(c=><button key={c} className={`btn btn-sm ${cat===c?'btn-primary':'btn-default'}`} onClick={()=>setCat(c)}>{c}</button>)}
+      </div>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(200px,1fr))',gap:12}}>
+        {filtered.map(intg=>(
+          <div key={intg.id} className={`int-card ${intg.connected?'connected':''}`}>
+            <div className="flex justify-between">
+              <div className="int-icon">{intg.icon}</div>
+              {intg.connected&&<span className="badge badge-success"><span className="bdot"/>Live</span>}
+            </div>
+            <div className="int-name">{intg.name}</div>
+            <div className="int-desc">{intg.desc}</div>
+            <div className="chip mb-3" style={{fontSize:10}}>{intg.cat}</div>
+            {intg.connected&&<div style={{fontSize:11,color:'var(--text2)',marginBottom:8}}>{intg.calls.toLocaleString()} API calls</div>}
+            <button className={`btn btn-sm w-full ${intg.connected?'btn-danger':'btn-success'}`} style={{justifyContent:'center'}} onClick={()=>toggle(intg.id)}>
+              {intg.connected?'Disconnect':'Connect'}
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ── LOGS ── */
+function LogsPage({logs,setLogs,user,workflows}){
+  const [filter,setFilter]=useState('all');
+  const [search,setSearch]=useState('');
+  const tenantWfIds=workflows.filter(w=>w.tenant===user.tenant).map(w=>w.id);
+  const filtered=logs.filter(l=>tenantWfIds.includes(l.wf)).filter(l=>{
+    if(filter!=='all'&&l.status!==filter)return false;
+    if(search&&!l.msg.toLowerCase().includes(search.toLowerCase())&&!l.wfName.toLowerCase().includes(search.toLowerCase()))return false;
+    return true;
+  });
+  const succCnt=logs.filter(l=>l.status==='success').length;
+  const errCnt=logs.filter(l=>l.status==='error').length;
+
+  return(
+    <div>
+      <div className="page-title">Logs & Monitoring</div>
+      <p className="page-sub">Track workflow executions and diagnose issues</p>
+      <div className="stats-grid" style={{gridTemplateColumns:'repeat(3,1fr)'}}>
+        <div className="stat-card"><div className="stat-val">{logs.length}</div><div className="stat-lbl">Total Events</div></div>
+        <div className="stat-card"><div className="stat-val text-green">{succCnt}</div><div className="stat-lbl">Successful</div></div>
+        <div className="stat-card"><div className="stat-val text-red">{errCnt}</div><div className="stat-lbl">Errors</div></div>
+      </div>
+      <div className="flex gap-2 mb-4 items-center">
+        <div className="search-box flex-1" style={{maxWidth:280}}>
+          <span className="s-icon">🔍</span>
+          <input className="form-input" placeholder="Search logs…" value={search} onChange={e=>setSearch(e.target.value)} style={{paddingLeft:30}}/>
+        </div>
+        {['all','success','error'].map(f=>(
+          <button key={f} className={`btn btn-sm ${filter===f?'btn-primary':'btn-default'}`} onClick={()=>setFilter(f)}>{f}</button>
+        ))}
+        <button className="btn btn-sm btn-danger" onClick={()=>{if(window.confirm('Clear all logs?')){setLogs([]);toast('Logs cleared','warn');}}}>Clear</button>
+      </div>
+      <div className="card" style={{padding:0}}>
+        <div className="table-wrap">
+          <table>
+            <thead><tr><th>Status</th><th>Workflow</th><th>Message</th><th>Duration</th><th>Time</th></tr></thead>
+            <tbody>
+              {filtered.length===0&&<tr><td colSpan={5}><div className="empty">No logs found</div></td></tr>}
+              {filtered.map(l=>(
+                <tr key={l.id}>
+                  <td><span className={`badge ${l.status==='success'?'badge-success':'badge-error'}`}>{l.status==='success'?'✓ ok':'✗ err'}</span></td>
+                  <td style={{maxWidth:160}}><div className="truncate" style={{fontWeight:500,fontSize:12.5,maxWidth:150}}>{l.wfName}</div></td>
+                  <td style={{maxWidth:320}}><div className="truncate" style={{fontSize:12,color:'var(--text2)',maxWidth:300}}>{l.msg}</div></td>
+                  <td><span className="font-mono text-xs text-muted">{l.duration?`${l.duration}ms`:'—'}</span></td>
+                  <td><span className="font-mono text-xs text-muted">{fmtTs(l.ts)}</span></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── ANALYTICS ── */
+function AnalyticsPage({workflows,logs}){
+  const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const barData=days.map(d=>({d,v:Math.floor(Math.random()*70+20)}));
+  const maxV=Math.max(...barData.map(b=>b.v));
+  const totalRuns=workflows.reduce((s,w)=>s+w.runs,0);
+  const avg=workflows.length?Math.round(workflows.reduce((s,w)=>s+w.successRate,0)/workflows.length):0;
+  const top=[...workflows].sort((a,b)=>b.runs-a.runs).slice(0,5);
+
+  return(
+    <div>
+      <div className="page-title">Analytics</div>
+      <p className="page-sub">Performance metrics and workflow insights</p>
+      <div className="stats-grid mb-4">
+        <div className="stat-card"><div className="stat-val text-blue">{totalRuns}</div><div className="stat-lbl">Total Runs</div></div>
+        <div className="stat-card"><div className="stat-val text-green">{avg}%</div><div className="stat-lbl">Avg Success Rate</div></div>
+        <div className="stat-card"><div className="stat-val" style={{color:'var(--purple)'}}>{workflows.length}</div><div className="stat-lbl">Total Workflows</div></div>
+        <div className="stat-card"><div className="stat-val" style={{color:'var(--amber)'}}>{logs.length}</div><div className="stat-lbl">Log Events</div></div>
+      </div>
+
+      <div className="grid-2 mb-4">
+        <div className="card">
+          <div className="card-title">Executions This Week</div>
+          <div className="bar-chart">
+            <div className="bar-chart-inner">
+              {barData.map(b=>(
+                <div key={b.d} style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',height:'100%',justifyContent:'flex-end',paddingBottom:20,position:'relative'}}>
+                  <div title={`${b.v} runs`} style={{width:'100%',height:`${(b.v/maxV)*100}%`,background:'var(--blue)',opacity:.75,borderRadius:'3px 3px 0 0',minHeight:4}}/>
+                  <div style={{position:'absolute',bottom:4,fontSize:9,color:'var(--text3)',fontFamily:'JetBrains Mono'}}>{b.d}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="card">
+          <div className="card-title">Top Workflows by Volume</div>
+          {top.map((wf,i)=>(
+            <div key={wf.id} className="mb-3">
+              <div className="flex justify-between mb-1">
+                <span style={{fontSize:12.5,fontWeight:500}} className="truncate">{wf.name}</span>
+                <span style={{fontSize:12,color:'var(--text2)',flexShrink:0,marginLeft:6}}>{wf.runs}</span>
+              </div>
+              <div className="prog-wrap">
+                <div className="prog-fill" style={{width:`${top[0].runs?Math.round(wf.runs/top[0].runs*100):0}%`,background:['var(--blue)','var(--purple)','var(--green)','var(--amber)','var(--red)'][i]}}/>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="card">
+        <div className="card-title">Workflow Health</div>
+        <div className="table-wrap">
+          <table>
+            <thead><tr><th>Workflow</th><th>Status</th><th>Runs</th><th>Success Rate</th><th>Health</th></tr></thead>
+            <tbody>
+              {workflows.map(wf=>(
+                <tr key={wf.id}>
+                  <td style={{fontWeight:500}}>{wf.name}</td>
+                  <td><span className={`badge ${wf.status==='active'?'badge-success':'badge-idle'}`}>{wf.status}</span></td>
+                  <td className="font-mono">{wf.runs}</td>
+                  <td>
+                    <div className="flex items-center gap-2">
+                      <div className="prog-wrap" style={{flex:1,margin:0}}>
+                        <div className="prog-fill" style={{width:`${wf.successRate}%`,background:wf.successRate>=95?'var(--green)':wf.successRate>=80?'var(--amber)':'var(--red)'}}/>
+                      </div>
+                      <span className="font-mono text-xs">{wf.successRate}%</span>
+                    </div>
+                  </td>
+                  <td><span className={`badge ${wf.successRate>=95?'badge-success':wf.successRate>=80?'badge-warn':'badge-error'}`}>{wf.successRate>=95?'Healthy':wf.successRate>=80?'Fair':'Degraded'}</span></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── TENANTS ── */
+function TenantsPage(){
+  const tenants=[
+    {id:'techcorp', name:'TechCorp Inc.',       users:3,workflows:5,plan:'Enterprise',status:'active',since:'Jan 2024'},
+    {id:'globalent',name:'GlobalEnt Solutions', users:1,workflows:2,plan:'Pro',       status:'active',since:'Mar 2024'},
+    {id:'startupco',name:'StartupCo',           users:2,workflows:1,plan:'Starter',   status:'trial', since:'Apr 2024'},
+  ];
+  return(
+    <div>
+      <div className="page-title">Multi-Tenant Management</div>
+      <p className="page-sub">Manage all organizations on FlowForge (Admin only)</p>
+      <div className="card">
+        <div className="table-wrap">
+          <table>
+            <thead><tr><th>Organization</th><th>Users</th><th>Workflows</th><th>Plan</th><th>Status</th><th>Since</th><th>Action</th></tr></thead>
+            <tbody>
+              {tenants.map(t=>(
+                <tr key={t.id}>
+                  <td><div style={{fontWeight:600}}>{t.name}</div><div style={{fontSize:11,color:'var(--text3)',fontFamily:'JetBrains Mono'}}>{t.id}</div></td>
+                  <td>{t.users}</td>
+                  <td>{t.workflows}</td>
+                  <td><span className="badge badge-info">{t.plan}</span></td>
+                  <td><span className={`badge ${t.status==='active'?'badge-success':'badge-warn'}`}>{t.status}</span></td>
+                  <td className="text-muted text-sm">{t.since}</td>
+                  <td><button className="btn btn-default btn-sm">Manage</button></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── SETTINGS ── */
+function SettingsPage({user}){
+  const [notif,setNotif]=useState({email:true,slack:false,sms:false});
+  const [saved,setSaved]=useState(false);
+  const save=()=>{setSaved(true);toast('Settings saved!','success');setTimeout(()=>setSaved(false),3000);};
+
+  return(
+    <div>
+      <div className="page-title">Settings</div>
+      <p className="page-sub">Manage your account and preferences</p>
+      <div className="grid-2">
+        <div>
+          <div className="card mb-4">
+            <div className="card-title">Profile</div>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="avatar" style={{width:48,height:48,fontSize:16}}>{user.name.split(' ').map(x=>x[0]).join('')}</div>
+              <div>
+                <div style={{fontWeight:600,fontSize:14}}>{user.name}</div>
+                <div style={{fontSize:12,color:'var(--text2)'}}>{user.email}</div>
+                <span className="badge badge-info mt-1">{user.role}</span>
+              </div>
+            </div>
+            <div className="form-group"><label className="form-label">Display Name</label><input className="form-input" defaultValue={user.name}/></div>
+            <div className="form-group"><label className="form-label">Email</label><input className="form-input" type="email" defaultValue={user.email}/></div>
+            <div className="form-group"><label className="form-label">Company</label><input className="form-input" defaultValue={user.company} disabled/></div>
+          </div>
+          <div className="card">
+            <div className="card-title">Security</div>
+            <div className="form-group"><label className="form-label">Current Password</label><input className="form-input" type="password" placeholder="••••••••"/></div>
+            <div className="form-group"><label className="form-label">New Password</label><input className="form-input" type="password" placeholder="••••••••"/></div>
+            <button className="btn btn-default btn-sm">Update Password</button>
+          </div>
+        </div>
+        <div>
+          <div className="card mb-4">
+            <div className="card-title">Notifications</div>
+            {[['email','📧','Email Notifications'],['slack','💬','Slack Alerts'],['sms','📱','SMS Alerts']].map(([k,icon,label])=>(
+              <div key={k} className="flex items-center justify-between" style={{padding:'10px 0',borderBottom:'1px solid var(--border)'}}>
+                <div className="flex gap-2 items-center"><span>{icon}</span><span style={{fontSize:13}}>{label}</span></div>
+                <label className="toggle"><input type="checkbox" checked={notif[k]} onChange={e=>setNotif(p=>({...p,[k]:e.target.checked}))}/><span className="toggle-slider"/></label>
+              </div>
+            ))}
+          </div>
+          <div className="card mb-4">
+            <div className="card-title">API Key</div>
+            <div className="flex gap-2">
+              <input className="form-input flex-1" value="ff_sk_••••••••••••••••••••••••••••••" readOnly style={{fontFamily:'JetBrains Mono',fontSize:11}}/>
+              <button className="btn btn-default btn-sm">Copy</button>
+            </div>
+            <div style={{fontSize:11,color:'var(--text3)',marginTop:6}}>Use this key to authenticate API requests.</div>
+            <button className="btn btn-default btn-sm mt-3">Regenerate Key</button>
+          </div>
+          <button className="btn btn-primary w-full btn-lg" style={{justifyContent:'center'}} onClick={save}>{saved?'✓ Saved!':'Save Settings'}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.render(<App/>,document.getElementById('root'));
+</script>
+</body>
+</html>
